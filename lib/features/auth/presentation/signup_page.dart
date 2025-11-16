@@ -9,20 +9,33 @@ class SignUpPage extends StatefulWidget {
 }
 
 class _SignUpPageState extends State<SignUpPage> {
+  final _firstNameC = TextEditingController();
+  final _lastNameC = TextEditingController();
+  final _phoneC = TextEditingController();
   final _emailC = TextEditingController();
   final _passC = TextEditingController();
   final _confirmC = TextEditingController();
+
   bool _isLoading = false;
 
   Future<void> _handleSignUp() async {
+    final firstName = _firstNameC.text.trim();
+    final lastName = _lastNameC.text.trim();
+    final phone = _phoneC.text.trim();
     final email = _emailC.text.trim();
     final pass = _passC.text;
     final confirm = _confirmC.text;
 
-    if (email.isEmpty || pass.isEmpty || confirm.isEmpty) {
+    if (firstName.isEmpty ||
+        lastName.isEmpty ||
+        phone.isEmpty ||
+        email.isEmpty ||
+        pass.isEmpty ||
+        confirm.isEmpty) {
       _showMsg('Semua field wajib diisi');
       return;
     }
+
     if (pass != confirm) {
       _showMsg('Password dan konfirmasi tidak sama');
       return;
@@ -30,12 +43,18 @@ class _SignUpPageState extends State<SignUpPage> {
 
     setState(() => _isLoading = true);
 
-    final error = await AuthService.signUp(email: email, password: pass);
+    final error = await AuthService.signUp(
+      email: email,
+      password: pass,
+      firstName: firstName,
+      lastName: lastName,
+      phone: phone,
+    );
 
     setState(() => _isLoading = false);
 
     if (error == null) {
-      _showMsg('Registrasi berhasil, silakan cek email jika perlu verifikasi');
+      _showMsg('Registrasi berhasil, silakan login.');
       Navigator.pop(context); // balik ke login
     } else {
       _showMsg(error);
@@ -43,11 +62,15 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   void _showMsg(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(msg)));
   }
 
   @override
   void dispose() {
+    _firstNameC.dispose();
+    _lastNameC.dispose();
+    _phoneC.dispose();
     _emailC.dispose();
     _passC.dispose();
     _confirmC.dispose();
@@ -56,8 +79,10 @@ class _SignUpPageState extends State<SignUpPage> {
 
   @override
   Widget build(BuildContext context) {
+    const cream = Color(0xFFF6EEDF);
+
     return Scaffold(
-      backgroundColor: const Color(0xFF0F172A),
+      backgroundColor: cream,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -67,10 +92,45 @@ class _SignUpPageState extends State<SignUpPage> {
               children: [
                 const Text(
                   'Sign Up',
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 24),
 
+                // First Name
+                TextField(
+                  controller: _firstNameC,
+                  decoration: const InputDecoration(
+                    labelText: 'First name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Last Name
+                TextField(
+                  controller: _lastNameC,
+                  decoration: const InputDecoration(
+                    labelText: 'Last name',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Mobile number
+                TextField(
+                  controller: _phoneC,
+                  keyboardType: TextInputType.phone,
+                  decoration: const InputDecoration(
+                    labelText: 'Mobile number',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Email
                 TextField(
                   controller: _emailC,
                   keyboardType: TextInputType.emailAddress,
@@ -81,6 +141,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Password
                 TextField(
                   controller: _passC,
                   obscureText: true,
@@ -91,6 +152,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 ),
                 const SizedBox(height: 16),
 
+                // Confirm Password
                 TextField(
                   controller: _confirmC,
                   obscureText: true,
