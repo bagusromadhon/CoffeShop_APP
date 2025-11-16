@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../services/auth_service.dart';
+import 'login_page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -11,33 +12,25 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   final _firstNameC = TextEditingController();
   final _lastNameC = TextEditingController();
-  final _phoneC = TextEditingController();
   final _emailC = TextEditingController();
   final _passC = TextEditingController();
-  final _confirmC = TextEditingController();
+  final _phoneC = TextEditingController();
 
   bool _isLoading = false;
 
   Future<void> _handleSignUp() async {
     final firstName = _firstNameC.text.trim();
     final lastName = _lastNameC.text.trim();
-    final phone = _phoneC.text.trim();
     final email = _emailC.text.trim();
     final pass = _passC.text;
-    final confirm = _confirmC.text;
+    final phone = _phoneC.text.trim();
 
     if (firstName.isEmpty ||
         lastName.isEmpty ||
-        phone.isEmpty ||
         email.isEmpty ||
         pass.isEmpty ||
-        confirm.isEmpty) {
+        phone.isEmpty) {
       _showMsg('Semua field wajib diisi');
-      return;
-    }
-
-    if (pass != confirm) {
-      _showMsg('Password dan konfirmasi tidak sama');
       return;
     }
 
@@ -70,112 +63,200 @@ class _SignUpPageState extends State<SignUpPage> {
   void dispose() {
     _firstNameC.dispose();
     _lastNameC.dispose();
-    _phoneC.dispose();
     _emailC.dispose();
     _passC.dispose();
-    _confirmC.dispose();
+    _phoneC.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    const darkGreen = Color(0xFF004134);
     const cream = Color(0xFFF6EEDF);
+    const accentGreen = Color(0xFF004B37);
+
+    InputDecoration _fieldDecoration(String label) {
+      return InputDecoration(
+        labelText: label,
+        labelStyle: const TextStyle(fontSize: 13),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: accentGreen, width: 2),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(24),
+          borderSide: const BorderSide(color: accentGreen, width: 2.4),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: cream,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  'Sign Up',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+        child: Column(
+          children: [
+            // ===== HEADER HIJAU + LOGO =====
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 32),
+              decoration: const BoxDecoration(
+                color: darkGreen,
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(48),
+                  bottomRight: Radius.circular(48),
                 ),
-                const SizedBox(height: 24),
-
-                // First Name
-                TextField(
-                  controller: _firstNameC,
-                  decoration: const InputDecoration(
-                    labelText: 'First name',
-                    border: OutlineInputBorder(),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.asset(
+                    'assets/images/LogoKEKO.png', // sesuaikan path
+                    height: 72,
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Last Name
-                TextField(
-                  controller: _lastNameC,
-                  decoration: const InputDecoration(
-                    labelText: 'Last name',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'KEKO',
+                    style: TextStyle(
+                      fontSize: 32,
+                      letterSpacing: 4,
+                      fontWeight: FontWeight.w700,
+                      color: cream,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Mobile number
-                TextField(
-                  controller: _phoneC,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Mobile number',
-                    border: OutlineInputBorder(),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Coffee & Eatery',
+                    style: TextStyle(
+                      fontSize: 14,
+                      letterSpacing: 1.3,
+                      color: Color(0xFFD8C6A4),
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-
-                // Email
-                TextField(
-                  controller: _emailC,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email.ID',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Password
-                TextField(
-                  controller: _passC,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Confirm Password
-                TextField(
-                  controller: _confirmC,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm Password',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: _isLoading ? null : _handleSignUp,
-                    child: _isLoading
-                        ? const CircularProgressIndicator()
-                        : const Text('REGISTER'),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
+
+            // ===== FORM SIGN UP =====
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Center(
+                      child: Text(
+                        'Sign up',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+
+                    // First Name
+                    TextField(
+                      controller: _firstNameC,
+                      decoration: _fieldDecoration('First Name'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Last Name
+                    TextField(
+                      controller: _lastNameC,
+                      decoration: _fieldDecoration('Last Name'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Email.ID
+                    TextField(
+                      controller: _emailC,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: _fieldDecoration('Email.ID'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Password
+                    TextField(
+                      controller: _passC,
+                      obscureText: true,
+                      decoration: _fieldDecoration('Password'),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Mobile No
+                    TextField(
+                      controller: _phoneC,
+                      keyboardType: TextInputType.phone,
+                      decoration: _fieldDecoration('Mobile No'),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Join the Brew Crew button
+                    SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentGreen,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                        ),
+                        onPressed: _isLoading ? null : _handleSignUp,
+                        child: _isLoading
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text(
+                                'Join the Brew Crew',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  letterSpacing: 1.2,
+                                ),
+                              ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // Already have an account?
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const LoginPage(),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Already have an account?',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
