@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
+import '../../../core/routes/app_routes.dart';
+
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -121,6 +123,16 @@ class HomePage extends GetView<HomeController> {
                               ],
                             ),
                           ),
+                          Positioned(
+                             right: 16,
+                              top: 16,
+                           child: IconButton(
+                          icon: Icon(Icons.settings, color: Colors.white),
+                         onPressed: () {
+                         Get.toNamed(Routes.settings);
+                         },
+      ),
+    ),
                         ],
                       ),
                     ),
