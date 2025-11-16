@@ -1,11 +1,28 @@
 import 'package:get/get.dart';
+import '../../../data/models/menu_item_model.dart';
+import '../../../services/menu_service.dart';
 
 class HomeController extends GetxController {
-  // contoh state kecil biar kelihatan GetX jalan
   var username = 'Guest'.obs;
 
-  // nanti bisa diisi dari Supabase profiles
-  void setUsername(String name) {
-    username.value = name;
+  var menus = <MenuItemModel>[].obs;
+  var isMenuLoading = false.obs;
+
+  Future<void> loadMenus() async {
+    try {
+      isMenuLoading.value = true;
+      final data = await MenuService.fetchMenu();
+      menus.assignAll(data);
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memuat menu: $e');
+    } finally {
+      isMenuLoading.value = false;
+    }
+  }
+
+  @override
+  void onInit() {
+    super.onInit();
+    loadMenus();
   }
 }

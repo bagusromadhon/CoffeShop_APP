@@ -224,26 +224,58 @@ class HomePage extends GetView<HomeController> {
               ),
               const SizedBox(height: 12),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: const [
-                    _MenuCard(
-                      imagePath: 'assets/images/menu_keko1.png',
-                      title: 'KEKO Kopi',
-                      subtitle: 'Kopi gula aren',
-                      price: 'Rp 20.000',
-                    ),
-                    SizedBox(height: 12),
-                    _MenuCard(
-                      imagePath: 'assets/images/menu_keko2.png',
-                      title: 'KEKO Latte',
-                      subtitle: 'Latte creamy manis',
-                      price: 'Rp 24.000',
-                    ),
-                  ],
-                ),
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 20),
+              //   child: Column(
+              //     children: const [
+              //       _MenuCard(
+              //         imagePath: 'assets/images/menu_keko1.png',
+              //         title: 'KEKO Kopi',
+              //         subtitle: 'Kopi gula aren',
+              //         price: 'Rp 20.000',
+              //       ),
+              //       SizedBox(height: 12),
+              //       _MenuCard(
+              //         imagePath: 'assets/images/menu_keko2.png',
+              //         title: 'KEKO Latte',
+              //         subtitle: 'Latte creamy manis',
+              //         price: 'Rp 24.000',
+              //       ),
+              //     ],
+              //   ),
+              // ),
+// sebelumnya kamu punya _MenuCard hardcoded
+// ganti jadi seperti ini:
+
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 20),
+  child: Obx(() {
+    if (controller.isMenuLoading.value) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (controller.menus.isEmpty) {
+      return const Text(
+        'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
+        style: TextStyle(fontSize: 12),
+      );
+    }
+
+    return Column(
+      children: controller.menus.map((m) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _MenuCard(
+            imagePath: 'assets/images/menu_keko1.png', // atau pakai m.imageUrl nanti
+            title: m.name,
+            subtitle: m.description ?? '',
+            price: 'Rp ${m.price}',
+          ),
+        );
+      }).toList(),
+    );
+  }),
+),
+
 
               const SizedBox(height: 24),
 
