@@ -1,56 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../services/auth_service.dart';
-import 'home_page.dart';
-import 'signup_page.dart';
+import 'package:get/get.dart';
 
-class LoginPage extends StatefulWidget {
+import '../controllers/auth_controller.dart';
+import '../../../core/routes/app_routes.dart';
+
+class LoginPage extends GetView<AuthController> {
   const LoginPage({super.key});
-
-  @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final _emailC = TextEditingController();
-  final _passC = TextEditingController();
-  bool _isLoading = false;
-
-  Future<void> _handleLogin() async {
-    final email = _emailC.text.trim();
-    final pass = _passC.text;
-
-    if (email.isEmpty || pass.isEmpty) {
-      _showMsg('Email dan password wajib diisi');
-      return;
-    }
-
-    setState(() => _isLoading = true);
-
-    final error = await AuthService.signIn(email: email, password: pass);
-
-    setState(() => _isLoading = false);
-
-    if (error == null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } else {
-      _showMsg(error);
-    }
-  }
-
-  void _showMsg(String msg) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(msg)));
-  }
-
-  @override
-  void dispose() {
-    _emailC.dispose();
-    _passC.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Text('Email.ID'),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: _emailC,
+                      controller: controller.emailC,
                       keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         isDense: true,
@@ -142,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                     const Text('Password'),
                     const SizedBox(height: 8),
                     TextField(
-                      controller: _passC,
+                      controller: controller.passC,
                       obscureText: true,
                       decoration: InputDecoration(
                         isDense: true,
@@ -182,33 +137,37 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 12),
 
-                    // NEXT button
-                    SizedBox(
-                      height: 48,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: accentGreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
+                    // NEXT button pakai GetX (Obx)
+                    Obx(
+                      () => SizedBox(
+                        height: 48,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: accentGreen,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
                           ),
+                          onPressed: controller.isLoading.value
+                              ? null
+                              : controller.signIn,
+                          child: controller.isLoading.value
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'NEXT',
+                                  style: TextStyle(
+                                    letterSpacing: 3,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
                         ),
-                        onPressed: _isLoading ? null : _handleLogin,
-                        child: _isLoading
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : const Text(
-                                'NEXT',
-                                style: TextStyle(
-                                  letterSpacing: 3,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                       ),
                     ),
 
@@ -222,12 +181,7 @@ class _LoginPageState extends State<LoginPage> {
                           const Text("Belum punya akun? "),
                           TextButton(
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const SignUpPage(),
-                                ),
-                              );
+                              Get.toNamed(Routes.signup);
                             },
                             child: const Text(
                               "Sign up",
@@ -255,8 +209,7 @@ class _LoginPageState extends State<LoginPage> {
 
                     const SizedBox(height: 16),
 
-                    // tombol Google & Facebook (kalau mau diaktifkan)
-                    // sementara boleh pakai Icon biar gak error asset
+                    // tombol Google & Facebook (dummy dulu)
                     _SocialButton(
                       text: 'Sign in with Google',
                       icon: Icons.g_mobiledata,

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:get/get.dart';
 
-import 'features/auth/presentation/login_page.dart';
-import 'features/auth/presentation/home_page.dart'; // dummy home
+import 'core/routes/app_pages.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,19 +20,20 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-final supabase = Supabase.instance.client;
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final session = supabase.auth.currentSession;
-
-    return MaterialApp(
+    return GetMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Coffee Shop',
-      home: session == null ? const LoginPage() : const HomePage(),
+      title: 'KEKO Coffee',
+      initialRoute: AppPages.initial,
+      getPages: AppPages.pages,
+      // sementara theme simple dulu aja
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
     );
   }
 }
