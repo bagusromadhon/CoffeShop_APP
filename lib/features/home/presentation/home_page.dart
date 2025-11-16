@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controllers/home_controller.dart';
 import '../../../core/routes/app_routes.dart';
-
+import '../../../data/models/menu_item_model.dart';
+import '../../cart/controllers/cart_controller.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -43,7 +45,8 @@ class HomePage extends GetView<HomeController> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // (optional) greet dari HomeController
+
+                    // greet dari HomeController
                     Obx(
                       () => Text(
                         'Welcome, ${controller.username.value}',
@@ -55,6 +58,7 @@ class HomePage extends GetView<HomeController> {
                       ),
                     ),
                     const SizedBox(height: 8),
+
                     // Search bar
                     TextField(
                       decoration: InputDecoration(
@@ -82,7 +86,7 @@ class HomePage extends GetView<HomeController> {
 
               const SizedBox(height: 16),
 
-              // ===== HERO IMAGE + BUTTON PESAN =====
+              // ===== HERO IMAGE + BUTTON PESAN + SETTINGS =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -92,7 +96,7 @@ class HomePage extends GetView<HomeController> {
                       child: Stack(
                         children: [
                           Image.asset(
-                            'assets/images/hero_keko.png', // sesuaikan dengan aset kamu
+                            'assets/images/hero_keko.png',
                             height: 160,
                             width: double.infinity,
                             fit: BoxFit.cover,
@@ -123,16 +127,38 @@ class HomePage extends GetView<HomeController> {
                               ],
                             ),
                           ),
+                          // Positioned(
+                          //   right: 16,
+                          //   top: 16,
+                          //   child: IconButton(
+                          //     icon: const Icon(Icons.settings, color: Colors.white),
+                          //     onPressed: () {
+                          //       Get.toNamed(Routes.settings);
+                          //     },
+                          //   ),
+                          // ),
                           Positioned(
-                             right: 16,
-                              top: 16,
-                           child: IconButton(
-                          icon: Icon(Icons.settings, color: Colors.white),
-                         onPressed: () {
-                         Get.toNamed(Routes.settings);
-                         },
+  right: 16,
+  top: 16,
+  child: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      IconButton(
+        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
+        onPressed: () {
+          Get.toNamed(Routes.cart);
+        },
       ),
-    ),
+      IconButton(
+        icon: const Icon(Icons.settings, color: Colors.white),
+        onPressed: () {
+          Get.toNamed(Routes.settings);
+        },
+      ),
+    ],
+  ),
+),
+
                         ],
                       ),
                     ),
@@ -148,7 +174,7 @@ class HomePage extends GetView<HomeController> {
                           ),
                         ),
                         onPressed: () {
-                          // nanti bisa buka halaman menu
+                          // nanti bisa buka halaman menu / cart / dsb
                         },
                         child: const Text(
                           'Pesan',
@@ -198,7 +224,7 @@ class HomePage extends GetView<HomeController> {
 
               const SizedBox(height: 24),
 
-              // ===== MENU POPULER =====
+              // ===== MENU POPULER (Supabase + Add to Cart) =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -224,58 +250,29 @@ class HomePage extends GetView<HomeController> {
               ),
               const SizedBox(height: 12),
 
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 20),
-              //   child: Column(
-              //     children: const [
-              //       _MenuCard(
-              //         imagePath: 'assets/images/menu_keko1.png',
-              //         title: 'KEKO Kopi',
-              //         subtitle: 'Kopi gula aren',
-              //         price: 'Rp 20.000',
-              //       ),
-              //       SizedBox(height: 12),
-              //       _MenuCard(
-              //         imagePath: 'assets/images/menu_keko2.png',
-              //         title: 'KEKO Latte',
-              //         subtitle: 'Latte creamy manis',
-              //         price: 'Rp 24.000',
-              //       ),
-              //     ],
-              //   ),
-              // ),
-// sebelumnya kamu punya _MenuCard hardcoded
-// ganti jadi seperti ini:
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Obx(() {
+                  if (controller.isMenuLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (controller.menus.isEmpty) {
+                    return const Text(
+                      'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
+                      style: TextStyle(fontSize: 12),
+                    );
+                  }
 
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  child: Obx(() {
-    if (controller.isMenuLoading.value) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (controller.menus.isEmpty) {
-      return const Text(
-        'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
-        style: TextStyle(fontSize: 12),
-      );
-    }
-
-    return Column(
-      children: controller.menus.map((m) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _MenuCard(
-            imagePath: 'assets/images/menu_keko1.png', // atau pakai m.imageUrl nanti
-            title: m.name,
-            subtitle: m.description ?? '',
-            price: 'Rp ${m.price}',
-          ),
-        );
-      }).toList(),
-    );
-  }),
-),
-
+                  return Column(
+                    children: controller.menus.map((m) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _MenuCard(menu: m),
+                      );
+                    }).toList(),
+                  );
+                }),
+              ),
 
               const SizedBox(height: 24),
 
@@ -356,21 +353,14 @@ class _ReasonCard extends StatelessWidget {
 }
 
 class _MenuCard extends StatelessWidget {
-  final String imagePath;
-  final String title;
-  final String subtitle;
-  final String price;
-
-  const _MenuCard({
-    required this.imagePath,
-    required this.title,
-    required this.subtitle,
-    required this.price,
-  });
+  final MenuItemModel menu;
+  const _MenuCard({required this.menu});
 
   @override
   Widget build(BuildContext context) {
+    final cartC = Get.find<CartController>();
     const cream = Color(0xFFF6EEDF);
+
     return Container(
       decoration: BoxDecoration(
         color: cream,
@@ -379,29 +369,39 @@ class _MenuCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
+          // Gambar
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.asset(
-              imagePath,
-              height: 64,
-              width: 64,
-              fit: BoxFit.cover,
-            ),
+            child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
+                ? Image.network(
+                    menu.imageUrl!,
+                    height: 64,
+                    width: 64,
+                    fit: BoxFit.cover,
+                  )
+                : Image.asset(
+                    'assets/images/menu_keko1.png',
+                    height: 64,
+                    width: 64,
+                    fit: BoxFit.cover,
+                  ),
           ),
           const SizedBox(width: 12),
+
+          // Text
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  menu.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  subtitle,
+                  menu.description ?? '',
                   style: const TextStyle(
                     fontSize: 12,
                     color: Colors.black54,
@@ -409,7 +409,7 @@ class _MenuCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  price,
+                  'Rp ${menu.price}',
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -418,18 +418,25 @@ class _MenuCard extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(width: 8),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Text(
-              'Hot',
-              style: TextStyle(fontSize: 10),
-            ),
-          )
+
+          // Tombol add to cart
+          IconButton(
+            icon: const Icon(Icons.add_shopping_cart),
+            onPressed: () {
+              cartC.addToCart(
+                menuId: menu.id,
+                name: menu.name,
+                price: menu.price,
+              );
+              Get.snackbar(
+                'Berhasil',
+                '${menu.name} ditambahkan ke cart',
+                snackPosition: SnackPosition.BOTTOM,
+              );
+            },
+          ),
         ],
       ),
     );

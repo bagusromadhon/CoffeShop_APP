@@ -9,7 +9,7 @@ import '../../features/home/bindings/home_binding.dart';
 
 import '../../core/controllers/theme_controller.dart';
 import '../../features/settings/settings_page.dart';
-
+import '../../features/cart/presentation/cart_page.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -36,5 +36,10 @@ class AppPages {
       page: () => const SettingsPage(),
       // kita gak perlu binding khusus di settings
     ),
+    GetPage(
+  name: Routes.cart,
+  page: () => const CartPage(),
+),
+
   ];
 }
