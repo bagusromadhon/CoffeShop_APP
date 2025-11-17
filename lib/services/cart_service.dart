@@ -3,6 +3,7 @@ import 'package:hive_flutter/hive_flutter.dart';
 class CartService {
   static Box get _box => Hive.box('cart');
 
+  // ambil semua item cart sebagai List<Map<String, dynamic>>
   static List<Map<String, dynamic>> getItems() {
     return _box.values
         .map((e) => (e as Map).cast<String, dynamic>())

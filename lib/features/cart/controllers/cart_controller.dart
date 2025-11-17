@@ -1,22 +1,34 @@
 import 'package:get/get.dart';
+import '../../../services/cart_service.dart';
 
 class CartController extends GetxController {
-  // list item di cart (sementara Map dulu, nanti bisa diganti model)
   var items = <Map<String, dynamic>>[].obs;
 
-  void addToCart({
+  @override
+  void onInit() {
+    super.onInit();
+    loadCart();
+  }
+
+  void loadCart() {
+    items.assignAll(CartService.getItems());
+  }
+
+  Future<void> addToCart({
     required String menuId,
     required String name,
     required int price,
-  }) {
-    items.add({
+  }) async {
+    await CartService.addItem({
       'menuId': menuId,
       'name': name,
       'price': price,
     });
+    loadCart(); // refresh dari Hive
   }
 
-  void clearCart() {
-    items.clear();
+  Future<void> clearCart() async {
+    await CartService.clear();
+    loadCart();
   }
 }
