@@ -250,29 +250,88 @@ class HomePage extends GetView<HomeController> {
               ),
               const SizedBox(height: 12),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Obx(() {
-                  if (controller.isMenuLoading.value) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (controller.menus.isEmpty) {
-                    return const Text(
-                      'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
-                      style: TextStyle(fontSize: 12),
-                    );
-                  }
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(horizontal: 20),
+              //   child: Obx(() {
+              //     if (controller.isMenuLoading.value) {
+              //       return const Center(child: CircularProgressIndicator());
+              //     }
+              //     if (controller.menus.isEmpty) {
+              //       return const Text(
+              //         'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
+              //         style: TextStyle(fontSize: 12),
+              //       );
+              //     }
 
-                  return Column(
-                    children: controller.menus.map((m) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _MenuCard(menu: m),
-                      );
-                    }).toList(),
-                  );
-                }),
-              ),
+              //     return Column(
+              //       children: controller.menus.map((m) {
+              //         return Padding(
+              //           padding: const EdgeInsets.only(bottom: 12),
+              //           child: _MenuCard(menu: m),
+              //         );
+              //       }).toList(),
+              //     );
+              //   }),
+              // ),
+              Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 20),
+  child: Obx(() {
+    // 1️⃣ lagi loading → muter spinner
+    if (controller.isMenuLoading.value) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    // kalau ada error (misal internet mati)
+    if (controller.menuError.value != null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            controller.menuError.value!,
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.redAccent,
+            ),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton(
+            onPressed: () {
+              controller.loadMenus();
+            },
+            child: const Text(
+              'Coba lagi',
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      );
+    }
+
+    // kalau gak error tapi memang kosong
+    if (controller.menus.isEmpty) {
+      return const Text(
+        'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
+        style: TextStyle(fontSize: 12),
+      );
+    }
+
+    //  data berhasil ke-load
+    return Column(
+      children: controller.menus.map((m) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _MenuCard(menu: m),
+        );
+      }).toList(),
+    );
+  }),
+),
+
 
               const SizedBox(height: 24),
 

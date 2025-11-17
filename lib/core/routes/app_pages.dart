@@ -7,19 +7,27 @@ import '../../features/auth/bindings/auth_binding.dart';
 import '../../features/home/presentation/home_page.dart';
 import '../../features/home/bindings/home_binding.dart';
 
+import '../../features/auth/presentation/auth_gate_page.dart';
+
 import '../../core/controllers/theme_controller.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
 import 'app_routes.dart';
 
 class AppPages {
-  static const initial = Routes.login;
+  // static const initial = Routes.login;
+  static const initial = Routes.authGate;  // 🔥 ganti jadi authGate
+
 
   static final pages = <GetPage>[
     GetPage(
       name: Routes.login,
       page: () => const LoginPage(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: Routes.authGate,
+      page: () => const AuthGatePage(),
     ),
     GetPage(
       name: Routes.signup,
