@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import '../../../services/auth_service.dart';
 import '../controllers/home_controller.dart';
 import '../../../core/routes/app_routes.dart';
 import '../../../data/models/menu_item_model.dart';
@@ -14,6 +14,10 @@ class HomePage extends GetView<HomeController> {
     const darkGreen = Color(0xFF004134);
     const cream = Color(0xFFF6EEDF);
     const sand = Color(0xFFD2B187); // background coklat
+
+    final cartC = Get.isRegistered<CartController>()
+      ? Get.find<CartController>()
+      : null;
 
     return Scaffold(
       backgroundColor: sand,
@@ -155,6 +159,21 @@ class HomePage extends GetView<HomeController> {
           Get.toNamed(Routes.settings);
         },
       ),
+       IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              onPressed: () async {
+                // optional: bersihin cart lokal juga
+                if (cartC != null) {
+                  await cartC.clearCart();
+                }
+
+                // sign out Supabase
+                await AuthService.signOut();
+
+                // lempar user balik ke login (atau Routes.authGate kalau mau)
+                Get.offAllNamed(Routes.login);
+              },
+            ),
     ],
   ),
 ),

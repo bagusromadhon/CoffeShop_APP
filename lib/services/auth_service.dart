@@ -28,7 +28,6 @@ class AuthService {
     required String phone,
   }) async {
     try {
-      // 1. sign up user
       final res = await supabase.auth.signUp(
         email: email,
         password: password,
@@ -39,7 +38,6 @@ class AuthService {
         return 'Gagal membuat user (user null).';
       }
 
-      // 2. insert ke profiles
       final insertRes = await supabase.from('profiles').insert({
         'id': user.id,
         'email': email,
@@ -49,21 +47,30 @@ class AuthService {
       });
 
       print('Insert profiles result: $insertRes');
-
       return null;
     } on AuthException catch (e) {
       print('AUTH ERROR signUp: $e');
       return e.message;
     } on PostgrestException catch (e) {
       print('POSTGREST ERROR signUp: ${e.message}');
-      return e.message; // biar kamu lihat pesan error asli
+      return e.message;
     } catch (e) {
       print('UNKNOWN ERROR signUp: $e');
       return 'Terjadi kesalahan, coba lagi.';
     }
   }
 
-  static Future<void> signOut() async {
-    await supabase.auth.signOut();
+  // Logout dengan error handling
+  static Future<String?> signOut() async {
+    try {
+      await supabase.auth.signOut();
+      return null;
+    } on AuthException catch (e) {
+      print('AUTH ERROR signOut: $e');
+      return e.message;
+    } catch (e) {
+      print('UNKNOWN ERROR signOut: $e');
+      return 'Gagal logout, coba lagi.';
+    }
   }
 }

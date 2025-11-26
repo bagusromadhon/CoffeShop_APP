@@ -16,7 +16,7 @@ import 'app_routes.dart';
 
 class AppPages {
   // static const initial = Routes.login;
-  static const initial = Routes.authGate;  // 🔥 ganti jadi authGate
+  static const initial = Routes.authGate;  //  ganti jadi authGate
 
 
   static final pages = <GetPage>[
