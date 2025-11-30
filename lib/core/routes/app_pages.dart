@@ -12,6 +12,9 @@ import '../../features/auth/presentation/auth_gate_page.dart';
 import '../../core/controllers/theme_controller.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
+
+import '../../features/location/presentation/location_page.dart';
+import '../../features/location/controllers/location_controller.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -44,6 +47,14 @@ class AppPages {
       page: () => const SettingsPage(),
       // kita gak perlu binding khusus di settings
     ),
+    // Tambahkan binding ini
+GetPage(
+  name: Routes.LOCATION, // Pastikan define di app_routes.dart
+  page: () => const LocationPage(),
+  binding: BindingsBuilder(() {
+    Get.put(LocationController());
+  }),
+),
     GetPage(
   name: Routes.cart,
   page: () => const CartPage(),

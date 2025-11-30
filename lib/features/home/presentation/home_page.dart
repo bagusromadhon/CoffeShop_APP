@@ -174,6 +174,13 @@ class HomePage extends GetView<HomeController> {
                 Get.offAllNamed(Routes.login);
               },
             ),
+            IconButton(
+  icon: const Icon(Icons.location_on_outlined, color: Colors.white), // Icon Location
+  onPressed: () {
+    // TAMBAHKAN INI:
+    Get.toNamed(Routes.LOCATION); 
+  },
+),
     ],
   ),
 ),

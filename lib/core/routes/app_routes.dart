@@ -7,4 +7,5 @@ abstract class Routes {
   static const home = '/home';
   static const settings = '/settings';
   static const cart = '/cart';
+  static const LOCATION = '/location';
 }
