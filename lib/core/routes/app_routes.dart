@@ -8,4 +8,5 @@ abstract class Routes {
   static const settings = '/settings';
   static const cart = '/cart';
   static const LOCATION = '/location';
+  static const dashboard = '/dashboard'; 
 }

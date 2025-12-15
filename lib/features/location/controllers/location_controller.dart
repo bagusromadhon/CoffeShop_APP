@@ -4,20 +4,20 @@ import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
 
 class LocationController extends GetxController {
-  // 1. VARIABEL DATA (Observable untuk UI)
-  var currentPosition = LatLng(0, 0).obs; // Koordinat saat ini
+  
+  var currentPosition = LatLng(0, 0).obs; 
   var latitude = '0.0'.obs;
   var longitude = '0.0'.obs;
-  var accuracy = '0.0'.obs; // Penting untuk laporan eksperimen
+  var accuracy = '0.0'.obs; 
   var altitude = '0.0'.obs;
-  var speed = '0.0'.obs;    // Penting untuk eksperimen bergerak
+  var speed = '0.0'.obs;    
 
-  // 2. STATUS & MODE
+  
   var isLoading = false.obs;
-  var isGpsMode = true.obs; // Toggle: True = GPS (High), False = Network (Low/Balanced)
+  var isGpsMode = true.obs; 
   var isLiveTracking = false.obs;
   
-  // Stream subscription untuk live tracking
+  
   StreamSubscription<Position>? _positionStream;
 
   @override
@@ -26,15 +26,12 @@ class LocationController extends GetxController {
     super.onClose();
   }
 
-  // ==========================================
-  // FUNGSI UTAMA: Mendapatkan Lokasi Sekali (One-Time)
-  // Cocok untuk Eksperimen 1 & 2 (Statis)
-  // ==========================================
+  
   Future<void> getCurrentLocation() async {
     try {
       isLoading.value = true;
       
-      // 1. Cek Izin dulu
+      
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         Get.snackbar('Error', 'GPS/Lokasi belum aktif. Silakan nyalakan.');
@@ -50,20 +47,18 @@ class LocationController extends GetxController {
         }
       }
 
-      // 2. Tentukan Akurasi berdasarkan Mode (Eksperimen GPS vs Network)
-      // GPS Mode = High / Best (Pakai Satelit)
-      // Network Mode = Low / Balanced (Pakai WiFi/Tower, lebih hemat baterai tapi kurang akurat)
+      
       LocationSettings locationSettings = LocationSettings(
         accuracy: isGpsMode.value ? LocationAccuracy.high : LocationAccuracy.low,
-        distanceFilter: 10, // Update tiap geser 10 meter (opsional)
+        distanceFilter: 10, 
       );
 
-      // 3. Ambil Posisi
+      
       Position position = await Geolocator.getCurrentPosition(
         locationSettings: locationSettings
       );
 
-      // 4. Update UI
+      
       _updateLocationData(position);
       
       Get.snackbar(
@@ -79,10 +74,7 @@ class LocationController extends GetxController {
     }
   }
 
-  // ==========================================
-  // FUNGSI LIVE TRACKING (Real-Time)
-  // Cocok untuk Eksperimen 3 (Bergerak)
-  // ==========================================
+  
   void toggleLiveTracking() {
     if (isLiveTracking.value) {
       _stopTracking();
@@ -94,10 +86,10 @@ class LocationController extends GetxController {
   void _startTracking() {
     isLiveTracking.value = true;
     
-    // Settingan stream
+    
     final locationSettings = LocationSettings(
       accuracy: isGpsMode.value ? LocationAccuracy.high : LocationAccuracy.low,
-      distanceFilter: 5, // Update setiap bergerak 5 meter
+      distanceFilter: 5, 
     );
 
     _positionStream = Geolocator.getPositionStream(locationSettings: locationSettings)
@@ -115,22 +107,22 @@ class LocationController extends GetxController {
     Get.snackbar('Tracking', 'Live tracking berhenti.');
   }
 
-  // Helper untuk update variabel
+  
   void _updateLocationData(Position position) {
     latitude.value = position.latitude.toString();
     longitude.value = position.longitude.toString();
-    accuracy.value = position.accuracy.toStringAsFixed(1); // dalam meter
+    accuracy.value = position.accuracy.toStringAsFixed(1); 
     altitude.value = position.altitude.toStringAsFixed(1);
-    speed.value = position.speed.toStringAsFixed(2); // m/s
+    speed.value = position.speed.toStringAsFixed(2); 
     
-    // Update koordinat peta
+    
     currentPosition.value = LatLng(position.latitude, position.longitude);
   }
   
-  // Helper untuk ganti mode (GPS vs Network)
+  
   void toggleMode(bool value) {
     isGpsMode.value = value;
-    // Jika sedang tracking, restart tracking dengan mode baru
+    
     if (isLiveTracking.value) {
       _stopTracking();
       _startTracking();

@@ -30,7 +30,7 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (error == null) {
-      Get.offAllNamed(Routes.home);
+      Get.offAllNamed(Routes.dashboard);
     } else {
       Get.snackbar('Error', error);
     }

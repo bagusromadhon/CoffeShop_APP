@@ -6,6 +6,8 @@ import '../../../core/routes/app_routes.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../cart/controllers/cart_controller.dart';
 
+import '../../dashboard/presentation/dashboard_page.dart';
+
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 

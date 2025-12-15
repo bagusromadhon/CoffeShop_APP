@@ -15,6 +15,8 @@ import '../../features/cart/presentation/cart_page.dart';
 
 import '../../features/location/presentation/location_page.dart';
 import '../../features/location/controllers/location_controller.dart';
+
+import '../../features/dashboard/presentation/dashboard_page.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -46,6 +48,10 @@ class AppPages {
       name: Routes.settings,
       page: () => const SettingsPage(),
       // kita gak perlu binding khusus di settings
+    ),
+    GetPage(
+      name: Routes.dashboard,
+      page: () => const DashboardPage(),
     ),
     // Tambahkan binding ini
 GetPage(
