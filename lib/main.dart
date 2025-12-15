@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -7,10 +8,23 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'core/controllers/theme_controller.dart';
 import 'core/routes/app_pages.dart';
 import 'features/cart/controllers/cart_controller.dart';
+import 'services/notification_handler.dart';
+
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+
+// 1. init Firebase
+await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+// 2. Init Notifikasi (FCM + Local) [cite: 584-585]
+  final notifHandler = FirebaseMessagingHandler();
+  await notifHandler.initPushNotification();
+  await notifHandler.initLocalNotification();
   // load env
   await dotenv.load(fileName: ".env");
 

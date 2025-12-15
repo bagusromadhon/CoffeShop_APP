@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "95219328050",
+    "project_id": "keko-587c3",
+    "storage_bucket": "keko-587c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:95219328050:android:eb60ec84672432941a482b",
+        "android_client_info": {
+          "package_name": "com.example.coffe_shop_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBgJ4E3_J9wPcvtdX9fslr3P7HztCo3Y1g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
