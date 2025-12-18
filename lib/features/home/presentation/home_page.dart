@@ -1,3 +1,4 @@
+import 'package:coffe_shop_app/features/auth/controllers/auth_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
@@ -53,16 +54,25 @@ class HomePage extends GetView<HomeController> {
                     const SizedBox(height: 20),
 
                     // greet dari HomeController
-                    Obx(
-                      () => Text(
-                        'Welcome, ${controller.username.value}',
-                        style: const TextStyle(
-                          color: cream,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                   // Menggunakan Get.find untuk mendapatkan AuthController di dalam Obx
+Obx(() {
+  // 1. Ambil instance AuthController yang sudah di-put di main.dart
+  final authC = Get.find<AuthController>();
+  
+  // 2. Akses .value dari RxString agar Obx bisa memantau perubahan
+  final email = authC.userEmail.value; 
+  
+  final displayUsername = email.isNotEmpty ? email.split('@')[0] : "Pelanggan";
+
+  return Text(
+    'Welcome, $displayUsername',
+    style: const TextStyle(
+      color: Colors.white, // Sesuaikan dengan variabel cream Anda
+      fontSize: 14,
+      fontWeight: FontWeight.w600,
+    ),
+  );
+}),
                     const SizedBox(height: 8),
 
                     // Search bar
@@ -225,7 +235,7 @@ class HomePage extends GetView<HomeController> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
-                      'Kenapa harus KEKO?',
+                      'Kenapa harus ?',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -305,7 +315,7 @@ class HomePage extends GetView<HomeController> {
   padding: const EdgeInsets.symmetric(horizontal: 20),
   child: Obx(() {
     // 1️⃣ lagi loading → muter spinner
-    if (controller.isMenuLoading.value) {
+    if (controller.isMenuLoading) {
       return const Center(
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16),
@@ -315,12 +325,12 @@ class HomePage extends GetView<HomeController> {
     }
 
     // kalau ada error (misal internet mati)
-    if (controller.menuError.value != null) {
+    if (controller.menuError.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            controller.menuError.value!,
+            controller.menuError,
             style: const TextStyle(
               fontSize: 12,
               color: Colors.redAccent,
@@ -456,50 +466,61 @@ class _MenuCard extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       child: Row(
         children: [
-          // Gambar
+          // GAMBAR DINAMIS
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
-                ? Image.network(
-                    menu.imageUrl!,
-                    height: 64,
-                    width: 64,
-                    fit: BoxFit.cover,
-                  )
-                : Image.asset(
-                    'assets/images/menu_keko1.png',
-                    height: 64,
-                    width: 64,
-                    fit: BoxFit.cover,
-                  ),
+            child: SizedBox(
+              height: 64,
+              width: 64,
+              child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
+                  ? Image.network(
+                      menu.imageUrl!,
+                      fit: BoxFit.cover,
+                      // Loading saat gambar diunduh
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        );
+                      },
+                      // Jika URL salah atau internet mati
+                      errorBuilder: (context, error, stackTrace) {
+                        return Image.asset(
+                          'assets/images/menu_keko1.png', // Gambar cadangan
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      'assets/images/menu_keko1.png', // Jika memang tidak ada URL di DB
+                      fit: BoxFit.cover,
+                    ),
+            ),
           ),
           const SizedBox(width: 12),
 
-          // Text
+          // TEXT (NAMA, DESKRIPSI, HARGA)
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   menu.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   menu.description ?? '',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Colors.black54,
-                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12, color: Colors.black54),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Rp ${menu.price}',
                   style: const TextStyle(
                     fontSize: 12,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
               ],
@@ -508,19 +529,21 @@ class _MenuCard extends StatelessWidget {
 
           const SizedBox(width: 8),
 
-          // Tombol add to cart
+          // TOMBOL ADD TO CART
           IconButton(
-            icon: const Icon(Icons.add_shopping_cart),
+            icon: const Icon(Icons.add_shopping_cart, color: Color(0xFF004134)),
             onPressed: () {
               cartC.addToCart(
                 menuId: menu.id,
                 name: menu.name,
                 price: menu.price,
+                imageUrl: menu.imageUrl, // Tambahkan imageUrl agar di Cart muncul fotonya
               );
               Get.snackbar(
                 'Berhasil',
-                '${menu.name} ditambahkan ke cart',
+                '${menu.name} ditambahkan',
                 snackPosition: SnackPosition.BOTTOM,
+                backgroundColor: Colors.white70,
               );
             },
           ),
@@ -529,7 +552,6 @@ class _MenuCard extends StatelessWidget {
     );
   }
 }
-
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String text;

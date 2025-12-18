@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart'; // Tambahkan ini
 
 import '../../../services/auth_service.dart';
 import '../../../core/routes/app_routes.dart';
 
 class AuthController extends GetxController {
+  // Variabel untuk menyimpan email user secara reaktif
+  final userEmail = ''.obs; 
+
   // TextEditingController biar bisa dipakai di login + signup
   final firstNameC = TextEditingController();
   final lastNameC  = TextEditingController();
@@ -14,6 +18,21 @@ class AuthController extends GetxController {
 
   // state loading
   final isLoading = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    // Jalankan pengecekan session saat controller pertama kali dimuat
+    _refreshUserSession();
+  }
+
+  // Fungsi untuk menyegarkan data email user dari session Supabase
+  void _refreshUserSession() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      userEmail.value = user.email ?? '';
+    }
+  }
 
   // ========== LOGIN ==========
   Future<void> signIn() async {
@@ -30,6 +49,8 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (error == null) {
+      // Segarkan email sebelum pindah halaman agar HomePage langsung punya data
+      _refreshUserSession(); 
       Get.offAllNamed(Routes.dashboard);
     } else {
       Get.snackbar('Error', error);
@@ -67,13 +88,13 @@ class AuthController extends GetxController {
     }
   }
 
-  // @override
-  // void onClose() {
-  //   firstNameC.dispose();
-  //   lastNameC.dispose();
-  //   emailC.dispose();
-  //   passC.dispose();
-  //   phoneC.dispose();
-  //   super.onClose();
-  // }
+  @override
+  void onClose() {
+    firstNameC.dispose();
+    lastNameC.dispose();
+    emailC.dispose();
+    passC.dispose();
+    phoneC.dispose();
+    super.onClose();
+  }
 }

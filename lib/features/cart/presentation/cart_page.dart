@@ -9,68 +9,125 @@ class CartPage extends GetView<CartController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Cart'),
+        title: const Text('Keranjang Belanja'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.delete_forever),
-            onPressed: () {
-              controller.clearCart();
-            },
-          )
+            icon: const Icon(Icons.delete_sweep),
+            onPressed: () => controller.clearCart(),
+          ),
         ],
       ),
       body: Obx(() {
         if (controller.items.isEmpty) {
-          return const Center(
-            child: Text('Cart masih kosong 😶'),
-          );
+          return const Center(child: Text('Keranjang masih kosong ☕'));
         }
-
-        // hitung total harga
-        final total = controller.items.fold<int>(
-          0,
-          (sum, item) => sum + (item['price'] as int),
-        );
 
         return Column(
           children: [
+            // LIST ITEM KERANJANG
             Expanded(
-              child: ListView.separated(
+              child: ListView.builder(
                 itemCount: controller.items.length,
-                separatorBuilder: (_, __) => const Divider(height: 0),
                 itemBuilder: (context, index) {
                   final item = controller.items[index];
                   return ListTile(
-                    leading: const Icon(Icons.local_cafe),
-                    title: Text(item['name'] ?? ''),
-                    subtitle: Text('Rp ${item['price']}'),
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(item['imageUrl'] ?? ''),
+                    ),
+                    title: Text(item['name']),
+                    subtitle: Text('Rp ${item['price']} x ${item['quantity']}'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.remove_circle_outline),
+                      onPressed: () => controller.removeItem(index),
+                    ),
                   );
                 },
               ),
             ),
+
+            // BAGIAN PILIH MEJA & CHECKOUT
             Container(
-              padding: const EdgeInsets.all(16),
-              child: Row(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+                boxShadow: [
+                  BoxShadow(color: Colors.black12, blurRadius: 10, spreadRadius: 2)
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Total',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                  // Row Pilihan Meja
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        "Pilih Nomor Meja:",
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                    ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: DropdownButton<int>(
+                          value: controller.selectedTable.value,
+                          underline: const SizedBox(),
+                          items: List.generate(15, (index) => index + 1)
+                              .map((e) => DropdownMenuItem(
+                                    value: e,
+                                    child: Text("Meja $e"),
+                                  ))
+                              .toList(),
+                          onChanged: (val) {
+                            if (val != null) controller.selectedTable.value = val;
+                          },
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    'Rp $total',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
+                  const SizedBox(height: 15),
+                  
+                  // Row Total Harga
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text("Total Bayar:", style: TextStyle(fontSize: 18)),
+                      Text(
+                        "Rp ${controller.totalAmount}",
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Tombol Pesan Sekarang
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.brown,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      onPressed: controller.isOrdering.value 
+                        ? null 
+                        : () => controller.placeOrder(),
+                      child: controller.isOrdering.value
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text("PESAN SEKARANG", style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ],
               ),
-            )
+            ),
           ],
         );
       }),

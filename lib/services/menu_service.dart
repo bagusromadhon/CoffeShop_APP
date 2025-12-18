@@ -33,6 +33,16 @@ class MenuService {
     });
   }
 
+  static Future<List<MenuItemModel>> fetchPopularMenu() async {
+  final res = await _client
+      .from('popular_menus')
+      .select();
+
+  return (res as List)
+      .map((e) => MenuItemModel.fromJson(e as Map<String, dynamic>))
+      .toList();
+}
+
   static Future<void> deleteMenu(String id) async {
     await _client.from(_table).delete().eq('id', id);
   }

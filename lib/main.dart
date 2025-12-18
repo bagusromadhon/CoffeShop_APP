@@ -1,3 +1,4 @@
+import 'package:coffe_shop_app/features/auth/controllers/auth_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -39,6 +40,7 @@ await Firebase.initializeApp(
   await Hive.openBox('cart');
 
   // register global controllers
+  Get.put(AuthController(), permanent: true);
   Get.put<ThemeController>(ThemeController(), permanent: true);
   Get.put<CartController>(CartController(), permanent: true);
 
