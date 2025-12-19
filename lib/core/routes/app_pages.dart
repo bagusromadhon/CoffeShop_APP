@@ -10,7 +10,7 @@ import '../../features/home/bindings/home_binding.dart';
 
 import '../../features/auth/presentation/auth_gate_page.dart';
 
-import '../../core/controllers/theme_controller.dart';
+// import '../../core/controllers/theme_controller.dart';
 import '../../features/settings/settings_page.dart';
 import '../../features/cart/presentation/cart_page.dart';
 
