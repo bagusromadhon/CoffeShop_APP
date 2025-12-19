@@ -7,7 +7,6 @@ class CartPage extends GetView<CartController> {
 
   @override
   Widget build(BuildContext context) {
-    // Warna sesuai desain gambar
     const Color bgBrown = Color(0xFFC4A484); 
     const Color darkGreen = Color(0xFF004134);
 
@@ -15,6 +14,7 @@ class CartPage extends GetView<CartController> {
       backgroundColor: bgBrown,
       appBar: AppBar(
         backgroundColor: bgBrown,
+        automaticallyImplyLeading: false,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: darkGreen),
@@ -48,7 +48,6 @@ class CartPage extends GetView<CartController> {
                   // Ambil data map
                   final item = controller.items[index];
                   
-                  // Pastikan handling null safety
                   final name = item['name'] ?? 'Menu';
                   final price = item['price'] ?? 0;
                   final qty = item['quantity'] ?? 1;

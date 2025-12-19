@@ -129,7 +129,7 @@ class _OrderStatusPageState extends State<OrderStatusPage>
   }
 
   Widget _buildLiveTracker() {
-    // Kita bungkus dengan Obx agar UI rebuild saat status di database berubah
+    //  bungkus dengan Obx agar UI rebuild saat status di database berubah
     return Obx(() {
       String status = controller.currentStatus.value;
       
@@ -163,7 +163,7 @@ class _OrderStatusPageState extends State<OrderStatusPage>
                   // TAHAP 3: COMPLETED / SIAP DIANTAR
                   _buildSegment(
                     isActive: status == 'completed',
-                    isCompleted: false, // Tahap terakhir tidak ada "lewat"
+                    isCompleted: false, 
                     animValue: animValue,
                     isLast: true,
                   ),

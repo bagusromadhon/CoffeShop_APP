@@ -1,3 +1,4 @@
+import 'package:coffe_shop_app/features/dashboard/binding/dashboard_binding.dart';
 import 'package:get/get.dart';
 
 import '../../features/auth/presentation/login_page.dart';
@@ -52,6 +53,7 @@ class AppPages {
     GetPage(
       name: Routes.dashboard,
       page: () => const DashboardPage(),
+      binding: DashboardBinding(),
     ),
     // Tambahkan binding ini
 GetPage(
