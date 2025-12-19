@@ -1,4 +1,5 @@
 import 'package:coffe_shop_app/features/auth/controllers/auth_controller.dart';
+import 'package:coffe_shop_app/features/home/presentation/all_menu_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../services/auth_service.dart';
@@ -262,6 +263,59 @@ Obx(() {
 
               const SizedBox(height: 24),
 
+          // 1. Judul Section
+const Padding(
+  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  child: Text(
+    "Paling Populer 🔥",
+    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  ),
+),
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  child: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        "Menu Kami",
+        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+      ),
+      TextButton(
+        onPressed: () => Get.to(() => const AllMenuPage()),
+        child: const Text(
+          "Lihat Semua",
+          style: TextStyle(color: Color(0xFF004134), fontWeight: FontWeight.bold),
+        ),
+      ),
+    ],
+  ),
+),
+
+// 2. Horizontal Scroll untuk Menu Populer
+SizedBox(
+  height: 220,
+  child: Obx(() {
+    if (controller.popularMenu.isEmpty) {
+      return const Center(child: Text("Belum ada data penjualan"));
+    }
+    return ListView.builder(
+      scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      itemCount: controller.popularMenu.length,
+      itemBuilder: (context, index) {
+        return _PopularMenuCard(menu: controller.popularMenu[index]);
+      },
+    );
+  }),
+),
+
+const Padding(
+  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+  child: Text(
+    "Semua Menu",
+    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+  ),
+),
               // ===== MENU POPULER (Supabase + Add to Cart) =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -450,6 +504,7 @@ class _ReasonCard extends StatelessWidget {
 }
 
 class _MenuCard extends StatelessWidget {
+
   final MenuItemModel menu;
   const _MenuCard({required this.menu});
 
@@ -552,6 +607,136 @@ class _MenuCard extends StatelessWidget {
     );
   }
 }
+
+
+class _PopularMenuCard extends StatelessWidget {
+  final MenuItemModel menu;
+  const _PopularMenuCard({required this.menu});
+
+  @override
+  Widget build(BuildContext context) {
+    // Memanggil CartController agar bisa menggunakan fungsi addToCart
+    final cartC = Get.find<CartController>();
+
+    return Container(
+      width: 180,
+      margin: const EdgeInsets.only(right: 16, bottom: 8, top: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Gambar Menu dengan Badge Best Seller
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
+                    ? Image.network(
+                        menu.imageUrl!,
+                        height: 110,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) => 
+                          Container(height: 110, color: Colors.grey[300], child: const Icon(Icons.image_not_supported)),
+                      )
+                    : Container(height: 110, color: Colors.grey[300]),
+              ),
+              Positioned(
+                top: 8,
+                left: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.9),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.star, color: Colors.white, size: 12),
+                      SizedBox(width: 4),
+                      Text(
+                        "Best Seller",
+                        style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          
+          // Informasi Menu & Tombol Tambah
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  menu.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                ),
+                Text(
+                  menu.category ?? "Coffee",
+                  style: TextStyle(color: Colors.grey[500], fontSize: 11),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Rp ${menu.price}",
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF004134),
+                      ),
+                    ),
+                    // TOMBOL ADD TO CART YANG ANDA MINTA
+                    GestureDetector(
+                      onTap: () {
+                        cartC.addToCart(
+                          menuId: menu.id,
+                          name: menu.name,
+                          price: menu.price,
+                          imageUrl: menu.imageUrl,
+                        );
+                        Get.snackbar(
+                          'Berhasil',
+                          '${menu.name} ditambahkan',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.white70,
+                          duration: const Duration(seconds: 1),
+                        );
+                      },
+                      child: const Icon(
+                        Icons.add_shopping_cart, 
+                        color: Color(0xFF004134), 
+                        size: 22
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
 class _ContactRow extends StatelessWidget {
   final IconData icon;
   final String text;
