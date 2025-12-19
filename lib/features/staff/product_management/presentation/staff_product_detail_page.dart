@@ -48,14 +48,27 @@ class StaffProductDetailPage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Gambar Besar
-            Container(
-              width: double.infinity,
-              height: 250,
-              color: Colors.grey[300],
-              child: item['image_url'] != null
-                  ? Image.network(item['image_url'], fit: BoxFit.cover)
-                  : const Icon(Icons.image, size: 100, color: Colors.grey),
-            ),
+          Container(
+  width: double.infinity,
+  height: 250,
+  color: Colors.grey[300],
+  child: item['image_url'] != null && item['image_url'].toString().startsWith('http')
+      ? Image.network(
+          item['image_url'],
+          fit: BoxFit.cover,
+          // PENANGANAN ERROR GAMBAR
+          errorBuilder: (context, error, stackTrace) {
+            return const Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                Text("Gambar tidak valid"),
+              ],
+            );
+          },
+        )
+      : const Icon(Icons.image, size: 100, color: Colors.grey),
+),
 
             Padding(
               padding: const EdgeInsets.all(20),

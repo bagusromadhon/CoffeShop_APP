@@ -31,23 +31,27 @@ class StaffProductListPage extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 12),
               elevation: 2,
               child: ListTile(
-                leading: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(8),
-                    image: item['image_url'] != null
-                        ? DecorationImage(
-                            image: NetworkImage(item['image_url']),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
-                  ),
-                  child: item['image_url'] == null
-                      ? const Icon(Icons.coffee, color: Colors.brown)
-                      : null,
-                ),
+          leading: Container(
+  width: 50,
+  height: 50,
+  decoration: BoxDecoration(
+    color: Colors.grey[200],
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(8),
+    child: item['image_url'] != null && item['image_url'].toString().startsWith('http')
+        ? Image.network(
+            item['image_url'],
+            fit: BoxFit.cover,
+            // PENANGANAN ERROR GAMBAR (PENTING)
+            errorBuilder: (context, error, stackTrace) {
+              return const Icon(Icons.broken_image, color: Colors.grey);
+            },
+          )
+        : const Icon(Icons.coffee, color: Colors.brown),
+  ),
+),
                 title: Text(item['name'] ?? 'No Name', 
                     style: const TextStyle(fontWeight: FontWeight.bold)),
                 subtitle: Text("Rp ${item['price']} • ${item['category']}"),
