@@ -368,7 +368,7 @@ const Padding(
               Padding(
   padding: const EdgeInsets.symmetric(horizontal: 20),
   child: Obx(() {
-    // 1️⃣ lagi loading → muter spinner
+    //  lagi loading → muter spinner
     if (controller.isMenuLoading) {
       return const Center(
         child: Padding(
@@ -378,7 +378,7 @@ const Padding(
       );
     }
 
-    // kalau ada error (misal internet mati)
+    // (if dont have internet )
     if (controller.menuError.isNotEmpty) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
