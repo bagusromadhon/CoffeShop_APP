@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import '../controller/staff_product_controller.dart';
 
 class StaffProductFormPage extends StatelessWidget {
-  final int? itemId; // Jika null = Mode Tambah, Jika ada isi = Mode Edit
+  // Ubah int? menjadi dynamic agar support UUID (String)
+  final dynamic itemId; 
+  
   const StaffProductFormPage({super.key, this.itemId});
 
   @override
@@ -21,7 +23,7 @@ class StaffProductFormPage extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            // Input Nama
+            // Nama
             TextField(
               controller: controller.nameC,
               decoration: const InputDecoration(
@@ -32,7 +34,7 @@ class StaffProductFormPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Input Harga
+            // Harga
             TextField(
               controller: controller.priceC,
               keyboardType: TextInputType.number,
@@ -44,7 +46,7 @@ class StaffProductFormPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
-            // Dropdown Kategori
+            // Kategori
             Obx(() => DropdownButtonFormField<String>(
               value: controller.selectedCategory.value,
               decoration: const InputDecoration(
@@ -59,19 +61,18 @@ class StaffProductFormPage extends StatelessWidget {
             )),
             const SizedBox(height: 16),
 
-            // Input URL Gambar
+            // URL Gambar
             TextField(
               controller: controller.imageUrlC,
               decoration: const InputDecoration(
-                labelText: "URL Gambar (Link)",
+                labelText: "URL Gambar",
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.link),
-                helperText: "Masukkan link gambar dari internet/supabase storage",
               ),
             ),
             const SizedBox(height: 16),
 
-            // Input Deskripsi
+            // Deskripsi
             TextField(
               controller: controller.descC,
               maxLines: 3,
@@ -92,7 +93,8 @@ class StaffProductFormPage extends StatelessWidget {
                     ? null
                     : () {
                         if (isEditing) {
-                          controller.updateProduct(itemId!);
+                          // itemId sekarang dynamic, jadi aman
+                          controller.updateProduct(itemId); 
                         } else {
                           controller.addProduct();
                         }
