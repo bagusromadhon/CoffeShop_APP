@@ -25,7 +25,6 @@ class AuthController extends GetxController {
     _refreshUserSession();
   }
 
-  // --- BAGIAN PENTING YANG HARUS DITAMBAHKAN ---
   @override
   void onReady() {
     super.onReady();
@@ -33,6 +32,7 @@ class AuthController extends GetxController {
     _checkAuthAndNavigate();
   }
 
+  // --- LOGIKA UTAMA MULTI USER ---
   void _checkAuthAndNavigate() async {
     // Beri jeda sedikit agar Splash Screen (jika ada) sempat tampil
     await Future.delayed(const Duration(milliseconds: 500));
@@ -40,18 +40,55 @@ class AuthController extends GetxController {
     final session = Supabase.instance.client.auth.currentSession;
 
     if (session != null) {
-      // 1. Jika User SUDAH Login (Session ada di HP)
+      // 1. User sudah login, update session
       _refreshUserSession();
-      // 2. Paksa pindah ke DASHBOARD (Halaman Induk yang punya BottomNav)
-      Get.offAllNamed(Routes.dashboard); 
+      // 2. JANGAN LANGSUNG KE DASHBOARD, CEK ROLE DULU
+      await _checkRoleAndRedirect(); 
     } else {
       // 3. Jika User BELUM Login, arahkan ke Login
       Get.offAllNamed(Routes.login); 
     }
   }
+
+  // Fungsi Baru: Cek Role ke Database Supabase
+  Future<void> _checkRoleAndRedirect() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    
+    // Safety check jika user null
+    if (userId == null) {
+      Get.offAllNamed(Routes.login);
+      return;
+    }
+
+    try {
+      // Query ke tabel 'users' untuk mengambil kolom 'role'
+      // Pastikan Anda sudah membuat tabel 'users' di Supabase sesuai instruksi sebelumnya
+      final data = await Supabase.instance.client
+          .from('users')
+          .select('role')
+          .eq('id', userId)
+          .single();
+
+      // Ambil role, default ke 'customer' jika null
+      final role = data['role'] as String? ?? 'customer';
+
+      if (role == 'staff') {
+        print("Login sebagai STAFF");
+        Get.offAllNamed(Routes.staffDashboard); // Arahkan ke Dashboard Staff
+      } else {
+        print("Login sebagai CUSTOMER");
+        Get.offAllNamed(Routes.dashboard); // Arahkan ke Dashboard Customer
+      }
+
+    } catch (e) {
+      print("Error cek role: $e");
+      // Fallback: Jika terjadi error (misal tabel belum dibuat),
+      // default-kan ke Customer agar aplikasi tidak macet.
+      Get.offAllNamed(Routes.dashboard);
+    }
+  }
   // ---------------------------------------------
 
-  // Fungsi untuk menyegarkan data email user dari session Supabase
   void _refreshUserSession() {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
@@ -75,8 +112,8 @@ class AuthController extends GetxController {
 
     if (error == null) {
       _refreshUserSession(); 
-      // Pindah ke Dashboard setelah login sukses
-      Get.offAllNamed(Routes.dashboard);
+      // PERUBAHAN DISINI: Panggil cek role, bukan langsung ke dashboard
+      await _checkRoleAndRedirect();
     } else {
       Get.snackbar('Error', error);
     }
@@ -96,6 +133,8 @@ class AuthController extends GetxController {
     }
 
     isLoading.value = true;
+    // AuthService.signUp seharusnya sudah handle insert ke auth.users
+    // Trigger di Supabase akan otomatis mengisi tabel public.users
     final error = await AuthService.signUp(
       email: email,
       password: pass,
@@ -111,6 +150,13 @@ class AuthController extends GetxController {
     } else {
       Get.snackbar('Error', error);
     }
+  }
+
+  // ========== SIGN OUT (PENTING UNTUK TEST MULTI USER) ==========
+  Future<void> signOut() async {
+    await Supabase.instance.client.auth.signOut();
+    userEmail.value = '';
+    Get.offAllNamed(Routes.login);
   }
 
   @override

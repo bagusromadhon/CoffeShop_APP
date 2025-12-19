@@ -1,4 +1,5 @@
 import 'package:coffe_shop_app/features/dashboard/binding/dashboard_binding.dart';
+import 'package:coffe_shop_app/features/staff/presentation/staff_dashboard_page.dart';
 import 'package:get/get.dart';
 
 import '../../features/auth/presentation/login_page.dart';
@@ -54,6 +55,10 @@ class AppPages {
       page: () => const DashboardPage(),
       binding: DashboardBinding(),
     ),
+    GetPage(
+  name: Routes.staffDashboard,
+  page: () => const StaffDashboardPage(),
+),
 GetPage(
   name: Routes.LOCATION, 
   page: () => const LocationPage(),
