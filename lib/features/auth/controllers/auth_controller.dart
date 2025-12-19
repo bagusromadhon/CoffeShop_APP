@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart'; // Tambahkan ini
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../services/auth_service.dart';
 import '../../../core/routes/app_routes.dart';
@@ -9,7 +9,7 @@ class AuthController extends GetxController {
   // Variabel untuk menyimpan email user secara reaktif
   final userEmail = ''.obs; 
 
-  // TextEditingController biar bisa dipakai di login + signup
+  // TextEditingController
   final firstNameC = TextEditingController();
   final lastNameC  = TextEditingController();
   final emailC     = TextEditingController();
@@ -22,9 +22,34 @@ class AuthController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Jalankan pengecekan session saat controller pertama kali dimuat
     _refreshUserSession();
   }
+
+  // --- BAGIAN PENTING YANG HARUS DITAMBAHKAN ---
+  @override
+  void onReady() {
+    super.onReady();
+    // Pengecekan otomatis saat aplikasi baru dibuka atau di-restart
+    _checkAuthAndNavigate();
+  }
+
+  void _checkAuthAndNavigate() async {
+    // Beri jeda sedikit agar Splash Screen (jika ada) sempat tampil
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    final session = Supabase.instance.client.auth.currentSession;
+
+    if (session != null) {
+      // 1. Jika User SUDAH Login (Session ada di HP)
+      _refreshUserSession();
+      // 2. Paksa pindah ke DASHBOARD (Halaman Induk yang punya BottomNav)
+      Get.offAllNamed(Routes.dashboard); 
+    } else {
+      // 3. Jika User BELUM Login, arahkan ke Login
+      Get.offAllNamed(Routes.login); 
+    }
+  }
+  // ---------------------------------------------
 
   // Fungsi untuk menyegarkan data email user dari session Supabase
   void _refreshUserSession() {
@@ -49,8 +74,8 @@ class AuthController extends GetxController {
     isLoading.value = false;
 
     if (error == null) {
-      // Segarkan email sebelum pindah halaman agar HomePage langsung punya data
       _refreshUserSession(); 
+      // Pindah ke Dashboard setelah login sukses
       Get.offAllNamed(Routes.dashboard);
     } else {
       Get.snackbar('Error', error);

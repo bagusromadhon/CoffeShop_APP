@@ -22,7 +22,7 @@ import 'app_routes.dart';
 
 class AppPages {
   // static const initial = Routes.login;
-  static const initial = Routes.authGate;  //  ganti jadi authGate
+  static const initial = Routes.authGate;  
 
 
   static final pages = <GetPage>[
@@ -48,16 +48,14 @@ class AppPages {
     GetPage(
       name: Routes.settings,
       page: () => const SettingsPage(),
-      // kita gak perlu binding khusus di settings
     ),
     GetPage(
       name: Routes.dashboard,
       page: () => const DashboardPage(),
       binding: DashboardBinding(),
     ),
-    // Tambahkan binding ini
 GetPage(
-  name: Routes.LOCATION, // Pastikan define di app_routes.dart
+  name: Routes.LOCATION, 
   page: () => const LocationPage(),
   binding: BindingsBuilder(() {
     Get.put(LocationController());
