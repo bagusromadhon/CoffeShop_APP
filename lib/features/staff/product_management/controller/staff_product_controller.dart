@@ -3,17 +3,14 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StaffProductController extends GetxController {
-  // List produk yang reaktif
   var products = <Map<String, dynamic>>[].obs;
   var isLoading = false.obs;
 
-  // Controller untuk Form Input
   final nameC = TextEditingController();
   final priceC = TextEditingController();
   final descC = TextEditingController();
   final imageUrlC = TextEditingController();
   
-  // Variabel untuk menyimpan kategori yang dipilih
   var selectedCategory = 'Coffee'.obs;
   final List<String> categories = ['Coffee', 'Non coffee', 'Food', 'Snack'];
 
@@ -23,7 +20,6 @@ class StaffProductController extends GetxController {
     fetchProducts();
   }
 
-  // --- READ (Ambil Data) ---
   void fetchProducts() async {
     try {
       isLoading.value = true;
@@ -31,19 +27,27 @@ class StaffProductController extends GetxController {
           .from('menu_items')
           .select()
           .order('created_at', ascending: false);
-      
       products.value = List<Map<String, dynamic>>.from(response);
     } catch (e) {
+      print("Error Fetch: $e"); // Debugging
       Get.snackbar("Error", "Gagal memuat produk: $e");
     } finally {
       isLoading.value = false;
     }
   }
 
-  // --- CREATE (Tambah Data) ---
+  // --- SAFE CREATE ---
   Future<void> addProduct() async {
+    // Validasi input
     if (nameC.text.isEmpty || priceC.text.isEmpty) {
       Get.snackbar("Error", "Nama dan Harga wajib diisi");
+      return;
+    }
+
+    // Validasi Harga harus Angka
+    int? parsedPrice = int.tryParse(priceC.text);
+    if (parsedPrice == null) {
+      Get.snackbar("Error", "Harga harus berupa angka valid");
       return;
     }
 
@@ -51,17 +55,18 @@ class StaffProductController extends GetxController {
       isLoading.value = true;
       await Supabase.instance.client.from('menu_items').insert({
         'name': nameC.text,
-        'price': int.parse(priceC.text),
+        'price': parsedPrice, // Gunakan hasil parse yang aman
         'category': selectedCategory.value,
         'description': descC.text,
-        'image_url': imageUrlC.text.isEmpty 
-            ? 'https://via.placeholder.com/150' // Placeholder jika kosong
+        // Validasi URL sederhana: Kalau kosong atau tidak ada http, pakai placeholder
+        'image_url': (imageUrlC.text.isEmpty || !imageUrlC.text.startsWith('http'))
+            ? 'https://via.placeholder.com/150' 
             : imageUrlC.text,
       });
 
-      Get.back(); // Tutup halaman form
+      Get.back();
       Get.snackbar("Sukses", "Menu berhasil ditambahkan");
-      fetchProducts(); // Refresh list
+      fetchProducts();
       clearForm();
     } catch (e) {
       Get.snackbar("Error", "Gagal menambah menu: $e");
@@ -70,20 +75,29 @@ class StaffProductController extends GetxController {
     }
   }
 
-  // --- UPDATE (Edit Data) ---
+  // --- SAFE UPDATE ---
   Future<void> updateProduct(int id) async {
+    // Validasi Harga
+    int? parsedPrice = int.tryParse(priceC.text);
+    if (parsedPrice == null) {
+      Get.snackbar("Error", "Harga harus berupa angka valid");
+      return;
+    }
+
     try {
       isLoading.value = true;
       await Supabase.instance.client.from('menu_items').update({
         'name': nameC.text,
-        'price': int.parse(priceC.text),
+        'price': parsedPrice,
         'category': selectedCategory.value,
         'description': descC.text,
-        'image_url': imageUrlC.text,
+        'image_url': (imageUrlC.text.isEmpty || !imageUrlC.text.startsWith('http'))
+            ? 'https://via.placeholder.com/150' 
+            : imageUrlC.text,
       }).eq('id', id);
 
       Get.back(); // Tutup form
-      Get.back(); // Tutup detail page (jika edit dari detail)
+      Get.back(); // Tutup detail page
       Get.snackbar("Sukses", "Menu berhasil diperbarui");
       fetchProducts();
       clearForm();
@@ -94,19 +108,17 @@ class StaffProductController extends GetxController {
     }
   }
 
-  // --- DELETE (Hapus Data) ---
   Future<void> deleteProduct(int id) async {
     try {
       await Supabase.instance.client.from('menu_items').delete().eq('id', id);
       fetchProducts();
-      Get.back(); // Tutup dialog/halaman detail
+      Get.back(); // Tutup halaman detail
       Get.snackbar("Sukses", "Menu berhasil dihapus");
     } catch (e) {
       Get.snackbar("Error", "Gagal menghapus: $e");
     }
   }
 
-  // Helper untuk membersihkan form
   void clearForm() {
     nameC.clear();
     priceC.clear();
@@ -115,10 +127,10 @@ class StaffProductController extends GetxController {
     selectedCategory.value = 'Coffee';
   }
 
-  // Helper untuk mengisi form saat mau Edit
   void fillForm(Map<String, dynamic> item) {
     nameC.text = item['name'] ?? '';
-    priceC.text = (item['price'] ?? 0).toString();
+    // Konversi aman ke String, apapun tipe data aslinya di DB
+    priceC.text = (item['price'] ?? 0).toString(); 
     descC.text = item['description'] ?? '';
     imageUrlC.text = item['image_url'] ?? '';
     selectedCategory.value = item['category'] ?? 'Coffee';

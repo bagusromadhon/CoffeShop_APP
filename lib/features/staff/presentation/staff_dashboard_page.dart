@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../auth/controllers/auth_controller.dart';
 import '../../../core/routes/app_routes.dart';
+import '../product_management/presentation/staff_product_list_page.dart'; 
 
 class StaffDashboardPage extends StatefulWidget {
   const StaffDashboardPage({super.key});
@@ -13,10 +14,17 @@ class StaffDashboardPage extends StatefulWidget {
 class _StaffDashboardPageState extends State<StaffDashboardPage> {
   int _selectedIndex = 0;
 
+
+
+
   // Halaman-halaman Staff
   final List<Widget> _pages = [
-    const Center(child: Text("Halaman Manage Order (Incoming)")), // Nanti kita buat ini
-    const Center(child: Text("Halaman Manage Product (Menu)")),   // Nanti kita buat ini
+    const Center(child: Text("Halaman Manage Order (Incoming)")), 
+    const StaffProductListPage(), 
+
+    const Center(child: Text("Settings / Logout")),
+    const Center(child: Text("Halaman Manage Order (Incoming)")), 
+    const Center(child: Text("Halaman Manage Product (Menu)")),   
     const Center(child: Text("Settings / Logout")),
   ];
 
