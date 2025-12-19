@@ -1,3 +1,4 @@
+import 'package:coffe_shop_app/features/order/presentation/order_status_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/routes/app_routes.dart';
@@ -99,7 +100,7 @@ class CartController extends GetxController {
       final String? paymentUrl = await MidtransService.getToken(
         orderId: orderId,
         grossAmount: totalAmount,
-        itemDetails: {}, // <--- PERBAIKAN: Kirim map kosong agar tidak error
+        itemDetails: {},
       );
 
       if (paymentUrl != null) {
@@ -124,32 +125,41 @@ class CartController extends GetxController {
     }
   }
 
-  // Fungsi Private: Hanya dipanggil jika pembayaran sukses
-  Future<void> _finalizeOrderToSupabase() async {
-    try {
-      isOrdering.value = true;
-      
-      await OrderService.submitOrder(
-        tableNumber: selectedTable.value,
-        totalPrice: totalAmount,
-        items: items,
-      );
 
-      await clearCart();
-      Get.offAllNamed(Routes.dashboard); 
-      
-      Get.snackbar(
-        "Pembayaran Berhasil!", 
-        "Pesanan meja ${selectedTable.value} telah diterima dapur.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 4),
-      );
-    } catch (e) {
-      Get.snackbar("Gawat", "Pembayaran sukses tapi gagal simpan data: $e");
-    } finally {
-      isOrdering.value = false;
-    }
+Future<void> _finalizeOrderToSupabase() async {
+  try {
+    isOrdering.value = true;
+    
+    // Simpan nomor meja sebelum cart di-clear
+    int tableNo = selectedTable.value; 
+
+    // 1. Simpan ke Supabase
+    await OrderService.submitOrder(
+      tableNumber: tableNo,
+      totalPrice: totalAmount,
+      items: items,
+    );
+
+    // 2. Bersihkan Keranjang
+    await clearCart();
+    
+    // 3. NAVIGASI KE STATUS PAGE (Perubahan Disini)
+    // Menggunakan Get.offAll agar user tidak bisa back ke halaman pembayaran
+    Get.offAll(() => OrderStatusPage(tableNumber: tableNo)); 
+
+    // Snackbar opsional (karena halaman status sudah cukup menjelaskan)
+    /* Get.snackbar(
+      "Pembayaran Berhasil!", 
+      "Pesanan masuk.",
+      backgroundColor: Colors.green,
+      colorText: Colors.white,
+    ); 
+    */
+    
+  } catch (e) {
+    Get.snackbar("Gawat", "Pembayaran sukses tapi gagal simpan data: $e");
+  } finally {
+    isOrdering.value = false;
   }
+}
 }
