@@ -38,6 +38,9 @@ dependencies:
   get: ^4.6.6
   shared_preferences: ^2.3.0
 
+  http: ^1.1.0  
+  webview_flutter: ^4.4.2 
+
   geolocator: ^13.0.2
   flutter_map: ^7.0.1
   latlong2: ^0.9.1
