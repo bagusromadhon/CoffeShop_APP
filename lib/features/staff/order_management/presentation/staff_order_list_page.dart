@@ -50,7 +50,7 @@ class StaffOrderListPage extends StatelessWidget {
               final order = orders[index];
               final status = order['status'] ?? 'pending';
 
-              // Parsing item JSON (karena di DB disimpan sebagai JSONB/Array)
+              // Parsing item JSON
               List<dynamic> items = order['items'] ?? [];
 
               return Card(
@@ -100,26 +100,35 @@ class StaffOrderListPage extends StatelessWidget {
 
                       // List Item Menu
                       ...items.map(
-                        (item) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "${item['quantity']}x ${item['name']}",
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                              Text(
-                                NumberFormat.currency(
-                                  locale: 'id',
-                                  symbol: '',
-                                  decimalDigits: 0,
-                                ).format(item['price'] * item['quantity']),
-                                style: const TextStyle(color: Colors.grey),
-                              ),
-                            ],
-                          ),
-                        ),
+                        (item) {
+                          // --- PERBAIKAN: SAFE PARSING UNTUK HARGA ---
+                          // Mencegah error "String is not subtype of int"
+                          final price = int.tryParse(item['price'].toString()) ?? 0;
+                          final qty = int.tryParse(item['quantity'].toString()) ?? 0;
+                          final totalItemPrice = price * qty;
+                          // -------------------------------------------
+
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 4),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "${item['quantity']}x ${item['name']}",
+                                  style: const TextStyle(fontSize: 15),
+                                ),
+                                Text(
+                                  NumberFormat.currency(
+                                    locale: 'id',
+                                    symbol: '',
+                                    decimalDigits: 0,
+                                  ).format(totalItemPrice),
+                                  style: const TextStyle(color: Colors.grey),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
 
                       const SizedBox(height: 12),
@@ -150,7 +159,6 @@ class StaffOrderListPage extends StatelessWidget {
                       const SizedBox(height: 16),
 
                       // TOMBOL AKSI UTAMA
-                      // Tombol hilang jika status sudah 'completed'
                       if (status != 'completed')
                         SizedBox(
                           width: double.infinity,
