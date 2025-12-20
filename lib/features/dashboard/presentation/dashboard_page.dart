@@ -1,3 +1,4 @@
+import 'package:coffe_shop_app/features/history/presentation/history_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -7,11 +8,7 @@ import '../../cart/presentation/cart_page.dart';
 import '../../settings/settings_page.dart'; 
 import '../../location/presentation/location_page.dart';
 
-class HistoryPage extends StatelessWidget {
-  const HistoryPage({super.key});
-  @override
-  Widget build(BuildContext context) => const Scaffold(body: Center(child: Text("Halaman Riwayat Pesanan")));
-}
+
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
