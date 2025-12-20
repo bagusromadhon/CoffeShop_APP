@@ -2,6 +2,7 @@
 abstract class Routes {
   // auth gate jadi root "/"
   static const authGate = '/';
+  static const splash = '/splash'; 
   static const login = '/login';
   static const signup = '/signup';
   static const home = '/home';

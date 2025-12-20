@@ -23,12 +23,20 @@ import 'app_routes.dart';
 
 import '../../features/home/presentation/product_detail_page.dart';
 
+import '../../features/splash/splash_page.dart';
+
 class AppPages {
   // static const initial = Routes.login;
-  static const initial = Routes.authGate;  
+  // static const initial = Routes.authGate;  
+  static const initial = Routes.splash;
 
 
   static final pages = <GetPage>[
+
+    GetPage(
+      name: Routes.splash,
+      page: () => const SplashPage(),
+    ),
     GetPage(
       name: Routes.login,
       page: () => const LoginPage(),

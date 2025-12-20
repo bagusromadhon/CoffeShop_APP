@@ -8,8 +8,6 @@ import '../../../core/routes/app_routes.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../cart/controllers/cart_controller.dart';
 
-// import '../../dashboard/presentation/dashboard_page.dart';
-
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
 
@@ -20,8 +18,8 @@ class HomePage extends GetView<HomeController> {
     const sand = Color(0xFFD2B187); // background coklat
 
     final cartC = Get.isRegistered<CartController>()
-      ? Get.find<CartController>()
-      : null;
+        ? Get.find<CartController>()
+        : null;
 
     return Scaffold(
       backgroundColor: sand,
@@ -55,55 +53,50 @@ class HomePage extends GetView<HomeController> {
                     const SizedBox(height: 20),
 
                     // greet dari HomeController
-                   // Menggunakan Get.find untuk mendapatkan AuthController di dalam Obx
-Obx(() {
-  // 1. Ambil instance AuthController yang sudah di-put di main.dart
-  final authC = Get.find<AuthController>();
-  
-  // 2. Akses .value dari RxString agar Obx bisa memantau perubahan
-  final email = authC.userEmail.value; 
-  
-  final displayUsername = email.isNotEmpty ? email.split('@')[0] : "Pelanggan";
+                    Obx(() {
+                      final authC = Get.find<AuthController>();
+                      final email = authC.userEmail.value;
+                      final displayUsername = email.isNotEmpty ? email.split('@')[0] : "Pelanggan";
 
-  return Text(
-    'Welcome, $displayUsername',
-    style: const TextStyle(
-      color: Colors.white, // Sesuaikan dengan variabel cream Anda
-      fontSize: 14,
-      fontWeight: FontWeight.w600,
-    ),
-  );
-}),
+                      return Text(
+                        'Welcome, $displayUsername',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      );
+                    }),
                     const SizedBox(height: 8),
 
                     // Search bar
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search',
-                        filled: true,
-                        fillColor: cream,
-                        prefixIcon: const Icon(Icons.search),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.close),
-                          onPressed: () {},
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 0,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(24),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                    ),
+                    // TextField(
+                    //   decoration: InputDecoration(
+                    //     hintText: 'Search',
+                    //     filled: true,
+                    //     fillColor: cream,
+                    //     prefixIcon: const Icon(Icons.search),
+                    //     suffixIcon: IconButton(
+                    //       icon: const Icon(Icons.close),
+                    //       onPressed: () {},
+                    //     ),
+                    //     contentPadding: const EdgeInsets.symmetric(
+                    //       horizontal: 16,
+                    //       vertical: 0,
+                    //     ),
+                    //     border: OutlineInputBorder(
+                    //       borderRadius: BorderRadius.circular(24),
+                    //       borderSide: BorderSide.none,
+                    //     ),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 16),
 
-              // ===== HERO IMAGE + BUTTON PESAN + SETTINGS =====
+              // ===== HERO IMAGE + BUTTON PESAN =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -144,60 +137,6 @@ Obx(() {
                               ],
                             ),
                           ),
-                          // Positioned(
-                          //   right: 16,
-                          //   top: 16,
-                          //   child: IconButton(
-                          //     icon: const Icon(Icons.settings, color: Colors.white),
-                          //     onPressed: () {
-                          //       Get.toNamed(Routes.settings);
-                          //     },
-                          //   ),
-                          // ),
-                          Positioned(
-  right: 16,
-  top: 16,
-  child: Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      IconButton(
-        icon: const Icon(Icons.shopping_cart_outlined, color: Colors.white),
-        onPressed: () {
-          Get.toNamed(Routes.cart);
-        },
-      ),
-      IconButton(
-        icon: const Icon(Icons.settings, color: Colors.white),
-        onPressed: () {
-          Get.toNamed(Routes.settings);
-        },
-      ),
-       IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
-              onPressed: () async {
-                // optional: bersihin cart lokal juga
-                if (cartC != null) {
-                  await cartC.clearCart();
-                }
-
-                // sign out Supabase
-                await AuthService.signOut();
-
-                // lempar user balik ke login (atau Routes.authGate kalau mau)
-                Get.offAllNamed(Routes.login);
-              },
-            ),
-            IconButton(
-  icon: const Icon(Icons.location_on_outlined, color: Colors.white), // Icon Location
-  onPressed: () {
-    // TAMBAHKAN INI:
-    Get.toNamed(Routes.LOCATION); 
-  },
-),
-    ],
-  ),
-),
-
                         ],
                       ),
                     ),
@@ -213,12 +152,13 @@ Obx(() {
                           ),
                         ),
                         onPressed: () {
-                          // nanti bisa buka halaman menu / cart / dsb
+                           // Navigasi ke menu atau tab pesanan
                         },
                         child: const Text(
-                          'Pesan',
+                          'Pesan Sekarang',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
+                            color: Colors.white
                           ),
                         ),
                       ),
@@ -229,32 +169,62 @@ Obx(() {
 
               const SizedBox(height: 24),
 
-              // ===== KENAPA HARUS KEKO =====
+              // ===== KENAPA HARUS KEKO (DESAIN BARU) =====
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Kenapa harus ?',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                      ),
+                    // Header Section yang lebih manis
+                    Row(
+                      children: [
+                        Container(
+                          width: 4, 
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: darkGreen, // Menggunakan warna tema
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        const Text(
+                          'Kenapa Harus Keko?',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: darkGreen, // Warna teks Hijau Tua biar kontras di Sand
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 12),
+                    
+                    const SizedBox(height: 16),
+
+                    // Grid dengan Tampilan Baru
                     GridView.count(
                       crossAxisCount: 2,
                       shrinkWrap: true,
                       mainAxisSpacing: 12,
                       crossAxisSpacing: 12,
                       physics: const NeverScrollableScrollPhysics(),
-                      childAspectRatio: 2.5,
+                      childAspectRatio: 2.2, 
                       children: const [
-                        _ReasonCard(text: 'Menggunakan biji kopi pilihan'),
-                        _ReasonCard(text: 'Barista profesional'),
-                        _ReasonCard(text: 'Penyajian yang cepat'),
-                        _ReasonCard(text: 'Dibuat dengan hati yang tulus'),
+                        _FeatureCard(
+                          text: 'Biji Pilihan',
+                          icon: Icons.coffee_rounded,
+                        ),
+                        _FeatureCard(
+                          text: 'Barista Pro',
+                          icon: Icons.person_pin_circle_rounded,
+                        ),
+                        _FeatureCard(
+                          text: 'Saji Cepat',
+                          icon: Icons.timer_outlined,
+                        ),
+                        _FeatureCard(
+                          text: 'Dibuat Tulus',
+                          icon: Icons.favorite_border_rounded,
+                        ),
                       ],
                     ),
                   ],
@@ -263,167 +233,113 @@ Obx(() {
 
               const SizedBox(height: 24),
 
-          // 1. Judul Section
-const Padding(
-  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  child: Text(
-    "Paling Populer 🔥",
-    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  ),
-),
-Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      const Text(
-        "Menu Kami",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      TextButton(
-        onPressed: () => Get.to(() => const AllMenuPage()),
-        child: const Text(
-          "Lihat Semua",
-          style: TextStyle(color: Color(0xFF004134), fontWeight: FontWeight.bold),
-        ),
-      ),
-    ],
-  ),
-),
+              // ===== PALING POPULER (HORIZONTAL) =====
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Text(
+                  "Paling Populer 🔥",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ),
+              
+              // Horizontal Scroll
+              SizedBox(
+                height: 220,
+                child: Obx(() {
+                  if (controller.popularMenu.isEmpty) {
+                    return const Center(child: Text("Belum ada data penjualan"));
+                  }
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: controller.popularMenu.length,
+                    itemBuilder: (context, index) {
+                      return _PopularMenuCard(menu: controller.popularMenu[index]);
+                    },
+                  );
+                }),
+              ),
 
-// 2. Horizontal Scroll untuk Menu Populer
-SizedBox(
-  height: 220,
-  child: Obx(() {
-    if (controller.popularMenu.isEmpty) {
-      return const Center(child: Text("Belum ada data penjualan"));
-    }
-    return ListView.builder(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: controller.popularMenu.length,
-      itemBuilder: (context, index) {
-        return _PopularMenuCard(menu: controller.popularMenu[index]);
-      },
-    );
-  }),
-),
-
-const Padding(
-  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-  child: Text(
-    "Semua Menu",
-    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-  ),
-),
-              // ===== MENU POPULER (Supabase + Add to Cart) =====
+              // ===== SEMUA MENU (HEADER) =====
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
-                  children: const [
-                    Expanded(
-                      child: Text(
-                        'Menu populer',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Menu Kami",
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
-                    Text(
-                      'Lihat semua',
-                      style: TextStyle(
-                        fontSize: 12,
-                        decoration: TextDecoration.underline,
+                    TextButton(
+                      onPressed: () => Get.to(() => const AllMenuPage()),
+                      child: const Text(
+                        "Lihat Semua",
+                        style: TextStyle(color: darkGreen, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
 
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(horizontal: 20),
-              //   child: Obx(() {
-              //     if (controller.isMenuLoading.value) {
-              //       return const Center(child: CircularProgressIndicator());
-              //     }
-              //     if (controller.menus.isEmpty) {
-              //       return const Text(
-              //         'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
-              //         style: TextStyle(fontSize: 12),
-              //       );
-              //     }
-
-              //     return Column(
-              //       children: controller.menus.map((m) {
-              //         return Padding(
-              //           padding: const EdgeInsets.only(bottom: 12),
-              //           child: _MenuCard(menu: m),
-              //         );
-              //       }).toList(),
-              //     );
-              //   }),
-              // ),
+              // ===== LIST SEMUA MENU =====
               Padding(
-  padding: const EdgeInsets.symmetric(horizontal: 20),
-  child: Obx(() {
-    //  lagi loading → muter spinner
-    if (controller.isMenuLoading) {
-      return const Center(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Obx(() {
+                  // Loading
+                  if (controller.isMenuLoading) {
+                    return const Center(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        child: CircularProgressIndicator(),
+                      ),
+                    );
+                  }
 
-    // (if dont have internet )
-    if (controller.menuError.isNotEmpty) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            controller.menuError,
-            style: const TextStyle(
-              fontSize: 12,
-              color: Colors.redAccent,
-            ),
-          ),
-          const SizedBox(height: 8),
-          OutlinedButton(
-            onPressed: () {
-              controller.loadMenus();
-            },
-            child: const Text(
-              'Coba lagi',
-              style: TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
-      );
-    }
+                  // Error
+                  if (controller.menuError.isNotEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          controller.menuError,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.redAccent,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        OutlinedButton(
+                          onPressed: () {
+                            controller.loadMenus();
+                          },
+                          child: const Text(
+                            'Coba lagi',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
 
-    // kalau gak error tapi memang kosong
-    if (controller.menus.isEmpty) {
-      return const Text(
-        'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
-        style: TextStyle(fontSize: 12),
-      );
-    }
+                  // Kosong
+                  if (controller.menus.isEmpty) {
+                    return const Text(
+                      'Belum ada menu. Tambahkan dari Supabase atau dari halaman admin.',
+                      style: TextStyle(fontSize: 12),
+                    );
+                  }
 
-    //  data berhasil ke-load
-    return Column(
-      children: controller.menus.map((m) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _MenuCard(menu: m),
-        );
-      }).toList(),
-    );
-  }),
-),
-
+                  // Data Ada
+                  return Column(
+                    children: controller.menus.map((m) {
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _MenuCard(menu: m),
+                      );
+                    }).toList(),
+                  );
+                }),
+              ),
 
               const SizedBox(height: 24),
 
@@ -475,36 +391,55 @@ const Padding(
 
 // ======== WIDGET KECIL2 ========
 
-class _ReasonCard extends StatelessWidget {
+// --- WIDGET BARU: Feature Card (Pengganti ReasonCard) ---
+class _FeatureCard extends StatelessWidget {
   final String text;
-  const _ReasonCard({required this.text});
+  final IconData icon;
+
+  const _FeatureCard({
+    required this.text,
+    required this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
-    const cream = Color(0xFFF6EEDF);
+    // Menggunakan warna tema Keko
+    const darkGreen = Color(0xFF004134); 
+    
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: cream,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
-          BoxShadow(
-            color: Colors.black12,
-            blurRadius: 4,
-            offset: Offset(0, 2),
+        // Background sedikit transparan gelap biar elegan di atas Sand
+        color: darkGreen.withOpacity(0.05), 
+        // Border tipis
+        border: Border.all(color: darkGreen.withOpacity(0.3)),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 22, color: darkGreen),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: darkGreen, // Teks Hijau Tua
+                height: 1.2,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ],
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(fontSize: 12),
       ),
     );
   }
 }
 
 class _MenuCard extends StatelessWidget {
-
   final MenuItemModel menu;
   const _MenuCard({required this.menu});
 
@@ -531,23 +466,21 @@ class _MenuCard extends StatelessWidget {
                   ? Image.network(
                       menu.imageUrl!,
                       fit: BoxFit.cover,
-                      // Loading saat gambar diunduh
                       loadingBuilder: (context, child, loadingProgress) {
                         if (loadingProgress == null) return child;
                         return const Center(
                           child: CircularProgressIndicator(strokeWidth: 2),
                         );
                       },
-                      // Jika URL salah atau internet mati
                       errorBuilder: (context, error, stackTrace) {
                         return Image.asset(
-                          'assets/images/menu_keko1.png', // Gambar cadangan
+                          'assets/images/menu_keko1.png',
                           fit: BoxFit.cover,
                         );
                       },
                     )
                   : Image.asset(
-                      'assets/images/menu_keko1.png', // Jika memang tidak ada URL di DB
+                      'assets/images/menu_keko1.png',
                       fit: BoxFit.cover,
                     ),
             ),
@@ -592,13 +525,14 @@ class _MenuCard extends StatelessWidget {
                 menuId: menu.id,
                 name: menu.name,
                 price: menu.price,
-                imageUrl: menu.imageUrl, // Tambahkan imageUrl agar di Cart muncul fotonya
+                imageUrl: menu.imageUrl,
               );
               Get.snackbar(
                 'Berhasil',
                 '${menu.name} ditambahkan',
                 snackPosition: SnackPosition.BOTTOM,
                 backgroundColor: Colors.white70,
+                duration: const Duration(seconds: 1),
               );
             },
           ),
@@ -608,14 +542,12 @@ class _MenuCard extends StatelessWidget {
   }
 }
 
-
 class _PopularMenuCard extends StatelessWidget {
   final MenuItemModel menu;
   const _PopularMenuCard({required this.menu});
 
   @override
   Widget build(BuildContext context) {
-    // Memanggil CartController agar bisa menggunakan fungsi addToCart
     final cartC = Get.find<CartController>();
 
     return Container(
@@ -702,7 +634,6 @@ class _PopularMenuCard extends StatelessWidget {
                         color: Color(0xFF004134),
                       ),
                     ),
-                    // TOMBOL ADD TO CART YANG ANDA MINTA
                     GestureDetector(
                       onTap: () {
                         cartC.addToCart(
@@ -735,7 +666,6 @@ class _PopularMenuCard extends StatelessWidget {
     );
   }
 }
-
 
 class _ContactRow extends StatelessWidget {
   final IconData icon;

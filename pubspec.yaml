@@ -83,7 +83,8 @@ flutter:
    - assets/images/hero_keko.png
    - assets/images/menu_keko1.png
    - assets/images/menu_keko2.png
-   - keko-587c3-firebase-adminsdk-fbsvc-49aecfe464.json
+   - assets/service_account.json
+   - assets/images/LogoKEKOHIJAU.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
