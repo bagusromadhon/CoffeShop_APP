@@ -2,19 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:get/get.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:url_launcher/url_launcher.dart'; 
 import '../controllers/location_controller.dart';
 
-class LocationPage extends GetView<LocationController> {
+class LocationPage extends StatelessWidget { // Gunakan StatelessWidget + Get.put agar lebih stabil
   const LocationPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Controller peta untuk fitur 'Center'
+    // Inject Controller (Agar aman jika belum ada di binding)
+    final controller = Get.put(LocationController()); 
     final MapController mapController = MapController();
 
     // Lokasi Target (Keko Coffee - Misal di Malang)
-    // Anda bisa ganti koordinat ini sesuai lokasi Keko sebenarnya
-    final LatLng kekoLocation = LatLng(-7.921346, 112.598223); 
+    final LatLng kekoLocation = const LatLng(-7.921346, 112.598223); 
 
     return Scaffold(
       body: Stack(
@@ -23,16 +24,9 @@ class LocationPage extends GetView<LocationController> {
           // LAYER 1: PETA (OpenStreetMap)
           // ===========================================
           Obx(() {
-            // Agar peta otomatis pindah saat marker user bergerak
-            // (Opsional: matikan ini jika ingin peta statis saat digeser manual)
-            if (controller.currentPosition.value.latitude != 0) {
-               // mapController.move(controller.currentPosition.value, 15);
-            }
-            
             return FlutterMap(
               mapController: mapController,
               options: MapOptions(
-                // Default start di Malang atau posisi user jika sudah ada
                 initialCenter: controller.currentPosition.value.latitude != 0
                     ? controller.currentPosition.value
                     : const LatLng(-7.943382, 112.614479), // Default Malang
@@ -41,7 +35,7 @@ class LocationPage extends GetView<LocationController> {
               children: [
                 TileLayer(
                   urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                  userAgentPackageName: 'com.example.keko_app',
+                  userAgentPackageName: 'com.bagus.coffeeshop', // Sesuaikan nama paket
                 ),
                 MarkerLayer(
                   markers: [
@@ -60,27 +54,37 @@ class LocationPage extends GetView<LocationController> {
                     ),
                     
                     // MARKER 2: POSISI USER (Rumah/Biru)
-                    // Hanya muncul jika lokasi sudah didapat (lat != 0)
                     if (controller.currentPosition.value.latitude != 0)
                       Marker(
                         point: controller.currentPosition.value,
                         width: 80,
                         height: 80,
                         child: const Icon(
-                          Icons.home_filled, // Icon Rumah sesuai desain
+                          Icons.home_filled, 
                           color: Colors.blue, 
                           size: 40
                         ),
                       ),
                   ],
                 ),
+                // Opsional: Garis Polyline antara User dan Toko
+                 if (controller.currentPosition.value.latitude != 0)
+                  PolylineLayer(
+                    polylines: [
+                      Polyline(
+                        points: [controller.currentPosition.value, kekoLocation],
+                        strokeWidth: 4.0,
+                        color: Colors.blue.withOpacity(0.5),
+                        pattern: const StrokePattern.dotted(), // Garis putus-putus
+                      ),
+                    ],
+                  ),
               ],
             );
           }),
 
           // ===========================================
-          // LAYER 2: PANEL EKSPERIMEN (WAJIB UTK MODUL)
-          // Letak: Atas
+          // LAYER 2: PANEL EKSPERIMEN (DATA RAW)
           // ===========================================
           SafeArea(
             child: Container(
@@ -94,7 +98,6 @@ class LocationPage extends GetView<LocationController> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Data Statistik untuk Laporan
                   const Text("Data Eksperimen Modul 5", 
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const Divider(),
@@ -102,29 +105,27 @@ class LocationPage extends GetView<LocationController> {
                     columnWidths: const {0: FlexColumnWidth(1), 1: FlexColumnWidth(2)},
                     children: [
                       _buildRow("Lat/Long", "${controller.latitude.value}, ${controller.longitude.value}"),
-                      _buildRow("Akurasi", "${controller.accuracy.value} m (Makin kecil makin bagus)"),
+                      _buildRow("Akurasi", "${controller.accuracy.value} m"),
                       _buildRow("Speed", "${controller.speed.value} m/s"),
                     ],
                   )),
                   const SizedBox(height: 10),
                   
-                  // Tombol Kontrol Eksperimen
+                  // Tombol Kontrol
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
                       children: [
-                        // Toggle GPS/Network
                         Obx(() => FilterChip(
-                          label: Text(controller.isGpsMode.value ? "Mode: GPS (High)" : "Mode: Network (Low)"),
+                          label: Text(controller.isGpsMode.value ? "Mode: GPS" : "Mode: Network"),
                           selected: controller.isGpsMode.value,
                           onSelected: (val) => controller.toggleMode(val),
-                          checkmarkColor: Colors.white,
-                          selectedColor: Colors.green[200],
+                          backgroundColor: Colors.white,
+                          selectedColor: Colors.green[100],
                         )),
                         const SizedBox(width: 8),
-                        // Tombol Live Tracking
                         Obx(() => ActionChip(
-                          avatar: Icon(controller.isLiveTracking.value ? Icons.stop : Icons.play_arrow),
+                          avatar: Icon(controller.isLiveTracking.value ? Icons.stop : Icons.play_arrow, size: 16),
                           label: Text(controller.isLiveTracking.value ? "Stop Live" : "Start Live"),
                           onPressed: () => controller.toggleLiveTracking(),
                           backgroundColor: controller.isLiveTracking.value ? Colors.red[100] : Colors.blue[100],
@@ -132,21 +133,23 @@ class LocationPage extends GetView<LocationController> {
                       ],
                     ),
                   ),
-                  // Tombol Refresh Manual (One-Time)
                   const SizedBox(height: 8),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
-                      icon: const Icon(Icons.my_location),
-                      label: const Text("Ambil Lokasi Saat Ini (Sekali)"),
-                      onPressed: () {
-                        controller.getCurrentLocation();
-                        // Opsional: Pindahkan kamera ke user
+                      icon: const Icon(Icons.my_location, size: 16),
+                      label: const Text("Ambil Lokasi & Pusatkan"),
+                      onPressed: () async {
+                        await controller.getCurrentLocation();
                         if(controller.currentPosition.value.latitude != 0){
-                           mapController.move(controller.currentPosition.value, 16);
+                           mapController.move(controller.currentPosition.value, 15);
                         }
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004134), foregroundColor: Colors.white),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF004134), 
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 0) // Kompak
+                      ),
                     ),
                   )
                 ],
@@ -155,8 +158,7 @@ class LocationPage extends GetView<LocationController> {
           ),
 
           // ===========================================
-          // LAYER 3: KARTU DETAIL LOKASI (SESUAI DESAIN FIGMA)
-          // Letak: Bawah
+          // LAYER 3: KARTU DETAIL LOKASI
           // ===========================================
           Positioned(
             left: 0,
@@ -173,34 +175,31 @@ class LocationPage extends GetView<LocationController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Judul & Rating
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Column(
+                      const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Keko Coffee & eatery", 
+                          Text("Keko Coffee & eatery", 
                               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 4),
+                          SizedBox(height: 4),
                           Row(
                             children: [
-                              const Text("4.2", style: TextStyle(fontWeight: FontWeight.bold)),
-                              const Icon(Icons.star, color: Colors.amber, size: 16),
-                              Text(" (220) • Convenience store", style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+                              Text("4.8", style: TextStyle(fontWeight: FontWeight.bold)),
+                              Icon(Icons.star, color: Colors.amber, size: 16),
+                              Text(" (220) • Coffee Shop", style: TextStyle(color: Colors.grey, fontSize: 12)),
                             ],
                           ),
                         ],
                       ),
-                      // Tombol Arah (Direction)
+                      // TOMBOL ARAH (Fixed)
                       InkWell(
                         onTap: () {
-                          // TODO: Buka Google Maps Eksternal
-                          // _launchMapsUrl(kekoLocation.latitude, kekoLocation.longitude);
-                          Get.snackbar("Info", "Membuka Google Maps...");
+                          _launchMapsUrl(kekoLocation.latitude, kekoLocation.longitude);
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: Colors.blue[50],
                             borderRadius: BorderRadius.circular(12),
@@ -211,16 +210,7 @@ class LocationPage extends GetView<LocationController> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  const Text("Jl. Bukit Pala 2, No 19 (Sesuai desain)", 
-                      style: TextStyle(color: Colors.grey)),
-                  const SizedBox(height: 4),
-                  const Row(
-                    children: [
-                      Text("Closed", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
-                      Text(" • Opens 8 am", style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
-                  const SizedBox(height: 20), // Spacer untuk bottom nav bar jika ada
+                  const Text("Jl. Danau Bratan, Malang", style: TextStyle(color: Colors.grey)),
                 ],
               ),
             ),
@@ -233,8 +223,16 @@ class LocationPage extends GetView<LocationController> {
   // Helper untuk baris tabel
   TableRow _buildRow(String label, String value) {
     return TableRow(children: [
-      Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(label, style: const TextStyle(color: Colors.grey))),
-      Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold))),
+      Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12))),
+      Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12))),
     ]);
+  }
+
+  // Helper Buka Google Maps
+  Future<void> _launchMapsUrl(double lat, double lon) async {
+    final Uri url = Uri.parse("http://maps.google.com/maps?q=$lat,$lon");
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      Get.snackbar("Error", "Tidak bisa membuka aplikasi peta");
+    }
   }
 }
