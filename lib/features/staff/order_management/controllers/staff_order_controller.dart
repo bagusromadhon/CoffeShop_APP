@@ -2,7 +2,14 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class StaffOrderController extends GetxController {
+
+  var selectedFilter = 'all'.obs; 
+
+  void setFilter(String status) {
+    selectedFilter.value = status;
+  }
   
+
   Stream<List<Map<String, dynamic>>> getOrderStream() {
     return Supabase.instance.client
         .from('orders')
@@ -12,44 +19,32 @@ class StaffOrderController extends GetxController {
   }
 
   Future<void> advanceStatus(dynamic orderId, String currentStatus) async {
-    // 1. UBAH KE HURUF KECIL DULU AGAR COCOK
+    // Pastikan pakai huruf kecil untuk logic switch
     String statusNormal = currentStatus.toLowerCase(); 
     String nextStatus = '';
 
-    print("Cek Status: $statusNormal"); // Debugging
-
     switch (statusNormal) {
-      case 'pending':
-        nextStatus = 'processing'; // Simpan sebagai huruf kecil atau besar tergantung selera, disini saya pakai kecil
-        break;
-      case 'processing':
-        nextStatus = 'ready';
-        break;
-      case 'ready':
-        nextStatus = 'completed';
-        break;
-      default:
-        print("Status tidak dikenali: $statusNormal");
-        return; // Ini yang bikin diam saja sebelumnya
+      case 'pending': nextStatus = 'processing'; break;
+      case 'processing': nextStatus = 'ready'; break;
+      case 'ready': nextStatus = 'completed'; break;
+      default: return;
     }
 
     try {
-      // 2. KITA UPDATE KE DB (SAYA PAKAI HURUF BESAR AGAR KONSISTEN DENGAN DB ANDA SEKARANG)
-      String statusToDb = nextStatus.toUpperCase(); 
-
+      // Simpan ke DB sebagai Huruf Besar (Sesuai format DB Anda)
       await Supabase.instance.client
           .from('orders')
-          .update({'status': statusToDb}) // Update jadi 'PROCESSING', 'READY', dll
+          .update({'status': nextStatus.toUpperCase()}) 
           .eq('id', orderId);
       
-      Get.snackbar("Sukses", "Status berubah jadi $statusToDb");
+      Get.snackbar("Update", "Status berubah jadi $nextStatus");
     } catch (e) {
       Get.snackbar("Error", "Gagal update status: $e");
     }
   }
 
+  // Helper UI
   String getStatusLabel(String status) {
-    // Handle huruf besar/kecil di UI juga
     switch (status.toLowerCase()) {
       case 'pending': return 'Pesanan Baru';
       case 'processing': return 'Sedang Disiapkan';
