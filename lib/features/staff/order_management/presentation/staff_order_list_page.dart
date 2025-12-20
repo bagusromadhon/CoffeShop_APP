@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart'; 
 import '../controllers/staff_order_controller.dart';
+import 'staff_order_detail_page.dart';
 
 class StaffOrderListPage extends StatelessWidget {
   const StaffOrderListPage({super.key});
@@ -118,16 +119,22 @@ class StaffOrderListPage extends StatelessWidget {
   }
 
   // --- WIDGET KARTU PESANAN (Dipisah biar rapi) ---
-  Widget _buildOrderCard(
-      Map<String, dynamic> order, 
-      String status, 
-      List<dynamic> items, 
-      StaffOrderController controller) {
+Widget _buildOrderCard(
+    Map<String, dynamic> order, 
+    String status, 
+    List<dynamic> items, 
+    StaffOrderController controller) {
     
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 3,
+      clipBehavior: Clip.antiAlias, //efek klik rapih 
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: InkWell( // <--- TAMBAHKAN INKWELL DISINI
+      onTap: () {
+        // Navigasi ke Halaman Detail
+        Get.to(() => StaffOrderDetailPage(order: order));
+      },
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -220,7 +227,8 @@ class StaffOrderListPage extends StatelessWidget {
             ]
           ],
         ),
-      ),
+      )
+    ),
     );
   }
 
