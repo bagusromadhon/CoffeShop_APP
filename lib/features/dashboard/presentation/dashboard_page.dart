@@ -1,4 +1,5 @@
 import 'package:coffe_shop_app/features/history/presentation/history_page.dart';
+import 'package:coffe_shop_app/features/profile/presentation/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -31,7 +32,7 @@ class DashboardPage extends StatelessWidget {
           HistoryPage(), 
           CartPage(),  
           LocationPage(), 
-          SettingsPage(),   
+          ProfilePage(),   
         ],
       )),
       
