@@ -1,7 +1,6 @@
-import 'package:coffe_shop_app/features/order/presentation/order_status_page.dart';
-// import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-// import '../../../core/routes/app_routes.dart';
+// import 'package:flutter/material.dart'; // Jika dibutuhkan
+import 'package:coffe_shop_app/features/order/presentation/order_status_page.dart';
 import '../../../services/cart_service.dart';
 import '../../../services/order_service.dart';
 import '../../../services/midtrans_service.dart'; 
@@ -33,18 +32,48 @@ class CartController extends GetxController {
     items.value = CartService.getItems();
   }
 
+  // --- [BARU] FUNGSI JEMBATAN UNTUK PRODUCT DETAIL PAGE ---
+  // Fungsi ini yang dipanggil oleh product_detail_page.dart
+  void addItem(Map<String, dynamic> product) {
+    // 1. Ambil data dari map product
+    final String id = product['id'].toString(); // Pastikan jadi String
+    final String name = product['name'] ?? 'Unknown';
+    final int price = int.tryParse(product['price'].toString()) ?? 0;
+    final String? imageUrl = product['image_url'];
+
+    // 2. Oper ke fungsi addToCart asli Anda
+    addToCart(
+      menuId: id,
+      name: name,
+      price: price,
+      imageUrl: imageUrl,
+    );
+  }
+  // ---------------------------------------------------------
+
   Future<void> addToCart({
     required String menuId,
     required String name,
     required int price,
     String? imageUrl,
   }) async {
+    // Cek apakah item sudah ada berdasarkan menuId
     int index = items.indexWhere((item) => item['menuId'] == menuId);
 
     if (index != -1) {
+      // Update quantity jika sudah ada
       items[index]['quantity'] = (items[index]['quantity'] ?? 1) + 1;
       items[index] = Map<String, dynamic>.from(items[index]); 
+      // Update juga di Local Storage (CartService) jika perlu logic update spesifik
+      // Namun biasanya CartService.addItem menimpa atau menambah baru,
+      // disini kita asumsikan CartService perlu di-update manual atau re-add.
+      // Untuk simplifikasi sesuai kode Anda sebelumnya:
+      await CartService.clear(); // Clear dulu (opsional, tergantung implementasi service)
+      for (var item in items) {
+        await CartService.addItem(item);
+      }
     } else {
+      // Tambah baru
       await CartService.addItem({
         'menuId': menuId,
         'name': name,
@@ -64,9 +93,16 @@ class CartController extends GetxController {
     if (currentQty > 1) {
       items[index]['quantity'] = currentQty - 1;
       items[index] = Map<String, dynamic>.from(items[index]);
+      
+      // Update CartService
+      await CartService.clear();
+      for (var i in items) {
+        await CartService.addItem(i);
+      }
     } else {
       removeItem(index);
     }
+    loadCart(); // Refresh UI
   }
   
   void removeItem(int index) async {
@@ -100,7 +136,7 @@ class CartController extends GetxController {
       final String? paymentUrl = await MidtransService.getToken(
         orderId: orderId,
         grossAmount: totalAmount,
-        itemDetails: {},
+        itemDetails: {}, // Bisa diisi items jika mau detail di Midtrans
       );
 
       if (paymentUrl != null) {
@@ -126,40 +162,30 @@ class CartController extends GetxController {
   }
 
 
-Future<void> _finalizeOrderToSupabase() async {
-  try {
-    isOrdering.value = true;
-    
-    // Simpan nomor meja sebelum cart di-clear
-    int tableNo = selectedTable.value; 
+  Future<void> _finalizeOrderToSupabase() async {
+    try {
+      isOrdering.value = true;
+      
+      // Simpan nomor meja sebelum cart di-clear
+      int tableNo = selectedTable.value; 
 
-    // 1. Simpan ke Supabase
-    await OrderService.submitOrder(
-      tableNumber: tableNo,
-      totalPrice: totalAmount,
-      items: items,
-    );
+      // 1. Simpan ke Supabase
+      await OrderService.submitOrder(
+        tableNumber: tableNo,
+        totalPrice: totalAmount,
+        items: items,
+      );
 
-    // 2. Bersihkan Keranjang
-    await clearCart();
-    
-    // 3. NAVIGASI KE STATUS PAGE (Perubahan Disini)
-    // Menggunakan Get.offAll agar user tidak bisa back ke halaman pembayaran
-    Get.offAll(() => OrderStatusPage(tableNumber: tableNo)); 
-
-    // Snackbar opsional (karena halaman status sudah cukup menjelaskan)
-    /* Get.snackbar(
-      "Pembayaran Berhasil!", 
-      "Pesanan masuk.",
-      backgroundColor: Colors.green,
-      colorText: Colors.white,
-    ); 
-    */
-    
-  } catch (e) {
-    Get.snackbar("Gawat", "Pembayaran sukses tapi gagal simpan data: $e");
-  } finally {
-    isOrdering.value = false;
+      // 2. Bersihkan Keranjang
+      await clearCart();
+      
+      // 3. NAVIGASI KE STATUS PAGE
+      Get.offAll(() => OrderStatusPage(tableNumber: tableNo)); 
+      
+    } catch (e) {
+      Get.snackbar("Gawat", "Pembayaran sukses tapi gagal simpan data: $e");
+    } finally {
+      isOrdering.value = false;
+    }
   }
-}
 }

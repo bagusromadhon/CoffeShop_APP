@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import '../controllers/home_controller.dart';
 import '../../../data/models/menu_item_model.dart';
 import '../../cart/controllers/cart_controller.dart';
+// 1. IMPORT ROUTES (PENTING)
+import '../../../core/routes/app_routes.dart'; 
 
 class AllMenuPage extends GetView<HomeController> {
   const AllMenuPage({super.key});
@@ -111,116 +113,139 @@ class _GridMenuCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartC = Get.find<CartController>();
     
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white, 
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Gambar & Rating
-          Expanded(
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(15),
-                    child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
-                        ? Image.network(
-                            menu.imageUrl!,
-                            width: double.infinity,
-                            height: double.infinity,
-                            fit: BoxFit.cover,
-                          )
-                        : Container(color: Colors.grey[200]),
-                  ),
-                ),
-                Positioned(
-                  top: 15,
-                  left: 15,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.star, color: Colors.amber, size: 12),
-                        SizedBox(width: 4),
-                        Text(
-                          "4.8", 
-                          style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          
-          // Info Menu
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  menu.name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                Text(
-                  menu.description ?? "Classic",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Rp ${menu.price}",
-                      style: const TextStyle(
-                        fontSize: 15, 
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+    // 2. BUNGKUS DENGAN GESTURE DETECTOR AGAR BISA DIKLIK KE DETAIL
+    return GestureDetector(
+      onTap: () {
+        // Konversi Model ke Map karena ProductDetailPage butuh Map
+        Get.toNamed(
+          Routes.productDetail,
+          arguments: {
+            'id': menu.id,
+            'name': menu.name,
+            'price': menu.price,
+            'image_url': menu.imageUrl,
+            'description': menu.description,
+            'category': menu.category, // Pastikan di Model ada field category (opsional)
+          },
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white, 
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Gambar & Rating
+            Expanded(
+              child: Stack(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(15),
+                      // 3. TAMBAHKAN HERO ANIMATION
+                      child: Hero(
+                        tag: 'product_img_${menu.id}',
+                        child: menu.imageUrl != null && menu.imageUrl!.isNotEmpty
+                            ? Image.network(
+                                menu.imageUrl!,
+                                width: double.infinity,
+                                height: double.infinity,
+                                fit: BoxFit.cover,
+                              )
+                            : Container(color: Colors.grey[200]),
                       ),
                     ),
-                    GestureDetector(
-                      onTap: () {
-                        cartC.addToCart(
-                          menuId: menu.id,
-                          name: menu.name,
-                          price: menu.price,
-                          imageUrl: menu.imageUrl,
-                        );
-                        Get.snackbar("Berhasil", "${menu.name} masuk keranjang", 
-                          snackPosition: SnackPosition.BOTTOM,
-                          duration: const Duration(milliseconds: 1000),
-                          backgroundColor: Colors.white70
-                        );
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF004134),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(Icons.add, color: Colors.white, size: 20),
+                  ),
+                  Positioned(
+                    top: 15,
+                    left: 15,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.star, color: Colors.amber, size: 12),
+                          SizedBox(width: 4),
+                          Text(
+                            "4.8", 
+                            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            
+            // Info Menu
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    menu.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    menu.description ?? "Classic",
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Rp ${menu.price}",
+                        style: const TextStyle(
+                          fontSize: 15, 
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          // Gunakan fungsi addItem yang baru kita buat
+                          cartC.addItem({
+                            'id': menu.id,
+                            'name': menu.name,
+                            'price': menu.price,
+                            'image_url': menu.imageUrl,
+                          });
+                          
+                          Get.snackbar("Berhasil", "${menu.name} masuk keranjang", 
+                            snackPosition: SnackPosition.BOTTOM,
+                            duration: const Duration(milliseconds: 1000),
+                            backgroundColor: Colors.white70
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF004134),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(Icons.add, color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

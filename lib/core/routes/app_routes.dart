@@ -10,4 +10,6 @@ abstract class Routes {
   static const LOCATION = '/location';
   static const dashboard = '/dashboard'; 
   static const staffDashboard = '/staff-dashboard'; 
+  static const productDetail = '/product-detail'; 
 }
+

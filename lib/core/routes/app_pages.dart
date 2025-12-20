@@ -21,6 +21,8 @@ import '../../features/location/controllers/location_controller.dart';
 import '../../features/dashboard/presentation/dashboard_page.dart';
 import 'app_routes.dart';
 
+import '../../features/home/presentation/product_detail_page.dart';
+
 class AppPages {
   // static const initial = Routes.login;
   static const initial = Routes.authGate;  
@@ -56,20 +58,29 @@ class AppPages {
       binding: DashboardBinding(),
     ),
     GetPage(
-  name: Routes.staffDashboard,
-  page: () => const StaffDashboardPage(),
-),
-GetPage(
-  name: Routes.LOCATION, 
-  page: () => const LocationPage(),
-  binding: BindingsBuilder(() {
+      name: Routes.staffDashboard,
+      page: () => const StaffDashboardPage(),
+    ),
+    GetPage(
+      name: Routes.LOCATION, 
+      page: () => const LocationPage(),
+      binding: BindingsBuilder(() {
     Get.put(LocationController());
   }),
 ),
     GetPage(
-  name: Routes.cart,
-  page: () => const CartPage(),
+      name: Routes.cart,
+      page: () => const CartPage(),
 ),
+
+GetPage(
+      name: Routes.productDetail,
+      page: () => ProductDetailPage(
+        product: Get.arguments, // <--- PENTING: Ambil data dari arguments
+      ),
+),
+
+  
 
   ];
 }
